@@ -1,0 +1,12 @@
+<!doctype html>
+<title>Upload file – JStagram</title>
+
+<h1><a href="/">JStagram</a></h1>
+
+<h2>Upload a picture</h2>
+
+<form action="/api/pictures" method="post" enctype="multipart/form-data">
+  <p><input name="title" type="text" autofocus size="40" placeholder="enter title" minlength="4" maxlength="100"></p>
+  <p><input name="picfile" type="file" accept="image/*"></p>
+  <p><input name="submit" type="submit" value="Upload"></p>
+</form>

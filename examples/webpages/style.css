@@ -1,0 +1,110 @@
+section.picture {
+  border: 1px solid #bbb;
+  border-radius: 1em;
+  padding: 1em;
+  margin: 1em 1em 0 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  position: relative;
+}
+
+section.picture a.img {
+  margin: auto;
+  display: block;
+}
+
+section.picture img {
+  max-width: 15em;
+  max-height: 15em;
+}
+
+section.picture p.title {
+  margin: 1em 0 0 0;
+  padding: 0;
+  text-align: center;
+  max-width: 15em;
+}
+
+section.picture .delete {
+  display: block;
+  position: absolute;
+  top: .75em;
+  right: .75em;
+  font-size: 67%;
+  width: 1em;
+  text-align: center;
+  padding: .5em;
+  border-radius: .5em;
+  background: rgba(255,0,0,.5);
+  color: white;
+  opacity: 0;
+  visibility: hidden; /* hidden elements don't register clicks */
+  transition: opacity .3s, visibility 0s;
+  font-family: "Arial";
+}
+
+section.picture:hover .delete {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity .3s 1.5s, visibility 0s 1.5s;
+}
+
+section.picture.upload {
+  padding: 2em;
+  display: flex;
+  justify-content: center;
+  align-content: center;
+  align-items: center;
+}
+
+section.picture.upload a {
+  font-size: 200%;
+  max-width: 6.5em;
+  text-align: center;
+  color: black;
+  text-decoration: none;
+}
+
+section.picture.upload a:hover {
+  text-decoration: underline;
+}
+
+#main {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  padding: 0 0 0 1em;
+  margin: 0;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+header {
+  width: 100vw;
+  height: 5em;
+  text-align: right;
+  padding: 1em;
+  box-sizing: border-box;
+  position: relative;
+}
+
+header h1 {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 1.5rem;
+  display: block;
+  text-align: center;
+  z-index: -1;
+}
+
+header .search,
+header .sort {
+  margin-left: 1em;
+  display: inline-block;
+}
