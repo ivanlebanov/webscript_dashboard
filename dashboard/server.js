@@ -41,9 +41,7 @@ app.use('/', function(req, res, next) { console.log(new Date(), req.method, req.
 //         ?title=...       - search by title substring
 //   DELETE /api/pictures/x - returns http status code only
 
-//app.get('/api/pictures', sendPictures);
-//app.post('/api/pictures', uploader.single('picfile'), uploadPicture);
-//app.delete('/api/pictures/:id', deletePicture);
+
 
 app.post('/api/login', login);
 app.get('/api/user', getUserName);
@@ -76,7 +74,10 @@ app.listen(8080);
  */
 
 
-
+/*
+*  Login with the information returned from the Google API
+*  and save some of user's information.
+*/
 function login(req, res) {
   // new user object
   var user = {
@@ -98,18 +99,14 @@ function login(req, res) {
 
   }else{
 
-    // update existing user just in case google has changed it as well as photo
+    // update existing user only fields token, photo, gid
     sql.query(sql.format('UPDATE user SET gtoken = ? , photo = ? WHERE gid = ?', [user.gtoken, user.photo, user.gid ]), function (err, result) {
       if (err) return error(res, 'failed sql insert', err);
 
       res.json({firstName: user.firstname});
-
     });
 
-    //
-
   }
-
 
 }
 
@@ -118,33 +115,6 @@ function getUserName(req, res){
     if (err) return error(res, 'failed to get filename for deletion', err);
 
     return res.json(data[0]);
-  });
-}
-
-function uploadPicture(req, res) {
-  // move the file where we want it
-  var fileExt = req.file.mimetype.split('/')[1] || 'png';
-  var newFilename = req.file.filename + '.' + fileExt;
-  fs.rename(req.file.path, localimg + newFilename, function (err) {
-    if (err) return error(res, 'failed to move incoming file', err);
-
-    // now add the file to the DB
-    var dbRecord = {
-      filename: newFilename,
-      title: req.body.title
-    };
-
-    sql.query(sql.format('INSERT INTO picture SET ?', dbRecord), function (err, result) {
-      if (err) return error(res, 'failed sql insert', err);
-
-      if (req.accepts('html')) {
-        // browser should go to the listing of pictures
-        res.redirect(303, '/#' + result.insertId);
-      } else {
-        // XML HTTP request that accepts JSON will instead get that
-        res.json({id: result.insertedId, title: dbRecord.title, file: webimg + dbRecord.filename});
-      }
-    });
   });
 }
 
