@@ -5,5 +5,7 @@
         "password": "root",
         "charset": "UTF8MB4",
         "database": "uboard"
-    }
+    },
+    "oauth_client_id" : "5045e9984b7ba7e07b52",
+    "client_secret" : "6ffd65c62579c61218b6223c896c6813fd9bd78a"
 }

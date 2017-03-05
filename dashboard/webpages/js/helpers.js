@@ -1,6 +1,6 @@
 function postAjax(url, data, success) {
   var params = typeof data == 'string' ? data : Object.keys(data).map(
-          function(k){ return encodeURIComponent(k) + '=' + encodeURIComponent(data[k]) }
+          function(k){ return encodeURIComponent(k) + '=' + encodeURIComponent(data[k]); }
       ).join('&');
 
   var xhr = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject("Microsoft.XMLHTTP");
