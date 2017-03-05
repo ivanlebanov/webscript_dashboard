@@ -10,8 +10,7 @@ var multer = require('multer');
 var mysql = require('mysql');
 var qs = require('querystring');
 var github = require('octonode');
-//client_id: config.oauth_client_id, //your GitHub client_id
-//client_secret: config.oauth_client_secret,  //and secret
+
 var config = require('./sql_config.json');
 var sql = mysql.createConnection(config.mysql);
 
@@ -52,7 +51,7 @@ app.use('/', function(req, res, next) { console.log(new Date(), req.method, req.
 app.post('/api/login', login);
 app.get('/api/user', getUserName);
 app.get('/github_authorized', GitAuth);
-app.get('/authorized', authorized);
+app.post('/api/authorize', authorized);
 
 // static files
 app.use('/', express.static(webpages, { extensions: ['html'] }));
@@ -122,28 +121,20 @@ function login(req, res) {
 
 
 function GitAuth(req, res) {
-  //var uri = res.parse(res.url);
   var values = qs.parse(req.query);
   var state = true;
-  // Check against CSRF attacks
-  if (!state || state[1] != values.state) {
-    res.writeHead(403, {'Content-Type': 'text/plain'});
-    res.end('');
-  } else {
-    github.auth.login(values.code, function (err, token) {
-      res.writeHead(200, {'Content-Type': 'text/plain'});
-      res.end(token);
-    });
-  }
+  res.redirect('/authorize?code=' + req.query.code );
+  res.end();
 
 }
 
 function authorized(req, res) {
-  var code = '6ba1964b7c87a3dca7bb93ec5b73330183815ffa';
+  var gid = req.query.gid;
+
   var data = qs.stringify({
       client_id: config.oauth_client_id, //your GitHub client_id
-      client_secret: config.oauth_client_secret,  //and secret
-     code: code   //the access code we parsed earlier
+      client_secret: config.client_secret,  //and secret
+      code: req.query.code   //the access code we parsed earlier
   });
 
   var reqOptions = {
@@ -159,19 +150,23 @@ function authorized(req, res) {
       res.setEncoding('utf8');
       res.on('data', function (chunk) { body += chunk; });
       res.on('end', function() {
-        console.log(qs.parse(body).access_token);
-        res.end(qs.parse(body).access_token);
-        //  cb(null, qs.parse(body).access_token);
+
+        sql.query(sql.format('UPDATE user SET gittoken = ? WHERE gid = ?', [qs.parse(body).access_token, gid ]), function (err, result) {
+          if (err) return error(res, 'failed gittoken update', err);
+
+        });
+
       });
   });
 
   req.write(data);
   req.end();
+  res.redirect('/authorized' );
   req.on('error', function(e) { cb(e.message); });
 }
 function getUserName(req, res){
   sql.query(sql.format('SELECT firstname, lastname, photo FROM user WHERE gid = ?', [req.query.gid]), function (err, data) {
-    if (err) return error(res, 'failed to get filename for deletion', err);
+    if (err) return error(res, 'failded to load username', err);
 
     return res.json(data[0]);
   });
