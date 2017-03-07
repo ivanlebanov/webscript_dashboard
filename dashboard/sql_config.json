@@ -7,5 +7,6 @@
         "database": "uboard"
     },
     "oauth_client_id" : "5045e9984b7ba7e07b52",
-    "client_secret" : "6ffd65c62579c61218b6223c896c6813fd9bd78a"
+    "client_secret" : "6ffd65c62579c61218b6223c896c6813fd9bd78a",
+    "newsapi_key" : "46a40b1ed79b4a96be26549ca314a24a"
 }

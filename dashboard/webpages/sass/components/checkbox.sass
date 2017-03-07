@@ -1,0 +1,14 @@
+// main: ../styles.sass
+@import ../variables
+input[type="checkbox"]
+  display: none!important
+  + label
+    padding: 10px 5px
+    display: block
+    border-radius: $radius
+    margin: 0 5px
+    cursor: pointer
+input[type="checkbox"]:checked
+  + label
+      background: $green
+      color: $white

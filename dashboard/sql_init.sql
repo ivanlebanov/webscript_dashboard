@@ -8,5 +8,6 @@ create table if not exists uboard.user (
   `gid` mediumtext,
   `photo` varchar(200) DEFAULT NULL,
   `gittoken` varchar(120) DEFAULT NULL,
+  `user_news` varchar(400) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) charset 'utf8mb4';

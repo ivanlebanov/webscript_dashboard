@@ -19,19 +19,8 @@ var app = express();
 // constants for directories
 var webpages = __dirname + '/webpages/';
 var test = __dirname + '/webpages/test/';
-var localimg = webpages + 'img/';
-var webimg = '/img/';
-var uploads = __dirname + '/uploads/';
 
-// multer is a package that handles file uploads nicely
-var uploader = multer({
-  dest: uploads,
-  limits: { // for security
-    fields: 10,
-    fileSize: 1024*1024*20,
-    files: 1,
-  }
-});
+
 
 // logging
 app.use('/', function(req, res, next) { console.log(new Date(), req.method, req.url); next(); });
@@ -52,7 +41,7 @@ app.post('/api/login', login);
 app.get('/api/user', getUserName);
 app.get('/github_authorized', GitAuth);
 app.post('/api/authorize', authorized);
-
+app.get('/api/news', getAllNewsProviders);
 // static files
 app.use('/', express.static(webpages, { extensions: ['html'] }));
 app.use('/test', express.static(webpages, { extensions: ['html'] }));
@@ -88,6 +77,7 @@ app.listen(80);
 */
 function login(req, res) {
   // new user object
+
   var user = {
     gid: req.query.gid,
     firstname: req.query.firstName,
@@ -96,37 +86,49 @@ function login(req, res) {
     photo: req.query.photo
   };
 
-  if(req.query.newUser == "true"){
 
-    // insert new user into the db
-    sql.query(sql.format('INSERT INTO user SET ?', user), function (err, result) {
-      if (err) return error(res, 'failed sql insert', err);
+    sql.query(sql.format('SELECT COUNT(*) AS countUsers FROM user WHERE gid = ?', [user.gid]), function (err, data) {
+      if (err) return error(res, 'failed getting user', err);
 
-      res.json({id: result.id, firstName: user.firstname});
+      var response = addOrUpdateUser(data, user);
+
+      res.json(response);
+
+
     });
 
-  }else{
-
-    // update existing user only fields token, photo, gid
-    sql.query(sql.format('UPDATE user SET gtoken = ? , photo = ? WHERE gid = ?', [user.gtoken, user.photo, user.gid ]), function (err, result) {
-      if (err) return error(res, 'failed sql insert', err);
-
-      res.json({firstName: user.firstname});
-    });
-
-  }
 
 }
 
+function addOrUpdateUser(data, user) {
+  if(data[0].countUsers > 0){
 
+   // update existing user only fields token, photo, gid
+   sql.query(sql.format('UPDATE user SET gtoken = ? , photo = ? WHERE gid = ?', [user.gtoken, user.photo, user.gid ]), function (err, result) {
+     if (err) return error(res, 'failed sql insert', err);
+     return {firstName: user.firstname};
+
+   });
+  }else{
+
+
+   // insert new user into the db
+   sql.query(sql.format('INSERT INTO user SET ?', user), function (err, result) {
+     if (err) return error(res, 'failed sql insert', err);
+     return {firstName: user.firstname};
+
+   });
+
+  }
+}
 
 function GitAuth(req, res) {
   var values = qs.parse(req.query);
   var state = true;
   res.redirect('/authorize?code=' + req.query.code );
   res.end();
-
 }
+
 
 function authorized(req, res) {
   var gid = req.query.gid;
@@ -164,11 +166,41 @@ function authorized(req, res) {
   res.redirect('/authorized' );
   req.on('error', function(e) { cb(e.message); });
 }
+
+
+function getAllNewsProviders(req, res) {
+  //  https://newsapi.org/v1/sources?language=en&sortBy=latest&apiKey=46a40b1ed79b4a96be26549ca314a24a
+
+  var reqOptions = {
+      host: 'newsapi.org',
+      path: '/v1/sources?language=en&apiKey='  + config.newsapi_key,
+      method: 'GET'
+    };
+
+  callback = function(response) {
+    var str = "";
+
+    //another chunk of data has been recieved, so append it to `str`
+    response.on('data', function (chunk) {
+      str += chunk;
+    });
+
+    //the whole response has been recieved, so we just return it
+    response.on('end', function () {
+      return res.send(str);
+    });
+  };
+
+  https.request(reqOptions, callback).end();
+}
+
 function getUserName(req, res){
   sql.query(sql.format('SELECT firstname, lastname, photo FROM user WHERE gid = ?', [req.query.gid]), function (err, data) {
     if (err) return error(res, 'failded to load username', err);
-
-    return res.json(data[0]);
+    if(data.length > 0)
+      return res.json(data[0]);
+    else
+      res.json({});
   });
 }
 

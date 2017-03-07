@@ -3,6 +3,42 @@
 
 body
   font-family: 'Open Sans'
+html
+  box-sizing: border-box
 
+*, *:before, *:after
+  box-sizing: inherit
 .g-signin2
   margin-top: 20px
+#brand_list
+  margin-top: 30px
+  display: flex
+  -webkit-flex-direction: row
+  flex-direction: row
+  -webkit-flex-wrap: wrap
+  flex-wrap: wrap
+  -webkit-justify-content: center
+  justify-content: center
+  -webkit-align-items: stretch
+  align-items: stretch
+  -webkit-align-content: stretch
+  align-content: stretch
+  li
+    width: 33%
+    -webkit-order: 0
+    order: 0
+    -webkit-flex-grow: 0
+    flex-grow: 0
+    -webkit-flex-shrink: 1
+    flex-shrink: 1
+    -webkit-flex-basis: auto
+    flex-basis: auto
+    -webkit-align-self: auto
+    align-self: auto
+    min-height: 60px
+    overflow: hidden
+    font-size: 20px
+    img
+      max-width: 33%
+      max-height: 20px
+      width: auto
