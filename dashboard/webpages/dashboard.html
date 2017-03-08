@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Uboard</title>
+    <link href="css/style.css" rel="stylesheet" type="text/css">
+    <meta name="google-signin-client_id" content="543548307797-b0hse2lbd2bc3t57nn4u62a3b4ilc9ll.apps.googleusercontent.com">
+  </head>
+  <body id="dashboard">
+    <nav>
+      <div id="profile_info">
+        <img :src="photo" alt="profile image">
+        <h1>{{ name }}</h1>
+      </div>
+      <div id="clock"></div>
+    </nav>
+    <main>
+      <div class="container">
+        <section id="issues" class="panel hidden">
+          <h2>Issues:</h2>
+          <div>
+            <ul id="issue_list">
+
+            </ul>
+          </div>
+
+        </seciton>
+      </div>
+    </main>
+    <footer>
+      <div id="chuck_joke">
+
+      </div>
+    </footer>
+    <script src="js/vue.js"></script>
+    <script src="js/helpers.js"></script>
+    <script src="js/dashboard.js"></script>
+  </body>
+</html>
+
+
+<!-- http://api.icndb.com/jokes/random?limitTo=[nerdy] -->

@@ -38,10 +38,13 @@ app.use('/', function(req, res, next) { console.log(new Date(), req.method, req.
 
 
 app.post('/api/login', login);
-app.get('/api/user', getUserName);
+app.get('/api/user', getUser);
 app.get('/github_authorized', GitAuth);
 app.post('/api/authorize', authorized);
 app.get('/api/news', getAllNewsProviders);
+
+app.post('/api/user/:id/news', postUserNews);
+app.get('/api/user/:id/issues', getIssues);
 // static files
 app.use('/', express.static(webpages, { extensions: ['html'] }));
 app.use('/test', express.static(webpages, { extensions: ['html'] }));
@@ -122,12 +125,21 @@ function addOrUpdateUser(data, user) {
   }
 }
 
+function postUserNews(req, res) {
+  sql.query(sql.format('UPDATE user SET user_news = ?  WHERE gid = ?', [ req.query.sources, req.params.id ]), function (err, result) {
+    if (err) return error(res, 'failed sql insert', err);
+    return res.json({'success' : true});
+
+  });
+}
+
 function GitAuth(req, res) {
   var values = qs.parse(req.query);
   var state = true;
   res.redirect('/authorize?code=' + req.query.code );
   res.end();
 }
+
 
 
 function authorized(req, res) {
@@ -169,8 +181,7 @@ function authorized(req, res) {
 
 
 function getAllNewsProviders(req, res) {
-  //  https://newsapi.org/v1/sources?language=en&sortBy=latest&apiKey=46a40b1ed79b4a96be26549ca314a24a
-
+  //  https://api.github.com/issues?access_token=
   var reqOptions = {
       host: 'newsapi.org',
       path: '/v1/sources?language=en&apiKey='  + config.newsapi_key,
@@ -194,7 +205,44 @@ function getAllNewsProviders(req, res) {
   https.request(reqOptions, callback).end();
 }
 
-function getUserName(req, res){
+function getIssues(req, res) {
+
+  sql.query(sql.format('SELECT gittoken FROM user WHERE gid = ?', [req.params.id]), function (err, data) {
+    if (err) return error(res, 'user not found', err);
+    if(data.length > 0){
+
+
+      //  https://api.github.com/issues?access_token=
+      var reqOptions = {
+          host: 'api.github.com',
+          path: '/issues?access_token='  + data[0].gittoken,
+          method: 'GET',
+          headers: {'User-Agent': 'Uboard'}
+        };
+
+      callback = function(response) {
+        var str = "";
+
+        //another chunk of data has been recieved, so append it to `str`
+        response.on('data', function (chunk) {
+          str += chunk;
+        });
+
+        //the whole response has been recieved, so we just return it
+        response.on('end', function () {
+          return res.send(str);
+        });
+      };
+
+      https.request(reqOptions, callback).end();
+
+    }
+
+
+  });
+}
+
+function getUser(req, res){
   sql.query(sql.format('SELECT firstname, lastname, photo FROM user WHERE gid = ?', [req.query.gid]), function (err, data) {
     if (err) return error(res, 'failded to load username', err);
     if(data.length > 0)

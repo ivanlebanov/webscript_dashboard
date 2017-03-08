@@ -17,7 +17,8 @@ function getNews(){
 
 getNews();
 
-function sendFavouriteNews() {
+function sendFavouriteNews(e) {
+  e.preventDefault();
   var checkedBoxes = getCheckedBoxes("sources");
   var valueObj = [];
 
@@ -27,12 +28,11 @@ function sendFavouriteNews() {
 
   var gid = document.cookie.replace(/(?:(?:^|.*;\s*)user\s*\=\s*([^;]*).*$)|^.*$/, "$1");
 
-      var url = 'http://localhost:80/api/user/news';
+      var url = 'http://localhost:80/api/user/' + gid + '/news' + "?sources=" + valueObj;
       postAjax(url, valueObj, function(data){
-        location.reload('http://localhost:80/finished');
+        window.location = 'http://localhost:80/finished';
       });
 
-  console.log(valueObj);
 
 }
 window.save_favourite_brands.addEventListener("click", sendFavouriteNews);
