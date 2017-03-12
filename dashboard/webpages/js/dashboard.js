@@ -28,11 +28,15 @@ function getUser() {
         photo: data.photo
       }
     });
+
+    setInterval(function(){
+      greeting(data.firstname + " " + data.lastname, new Date(), true);
+    },60000 * 10);
   });
 
 }
 
-function greeting(name, date) {
+function greeting(name, date, elem = false) {
   var greeting = "";
   if(date.getHours() < 12){
     greeting = "Good morning " + name + "!";
@@ -41,6 +45,8 @@ function greeting(name, date) {
   }else{
     greeting = "Good evening, " + name + "!";
   }
+  if(elem)
+    window.the_name.textContent = "" + greeting;
 
   return greeting;
 
@@ -54,14 +60,11 @@ function getIssues() {
   getAjax(url, function(data){
     data = JSON.parse(data);
     window.issue_list.innerHTML = "";
-
-
     var has_issues = (data.length > 0) ? true : false;
     window.issues.classList.remove("hidden");
     if(data.length > 0){
 
       for (var i = 0; i < data.length; i++) {
-
         var element = document.createElement("li");
         var heading_item = document.createElement("h3");
         var paragraph_item = document.createElement("p");
@@ -79,18 +82,28 @@ function getIssues() {
       window.issues.appendChild(p);
     }
 
-
-
   });
 
 }
+
 function getNewsArticles() {
   var gid = QueryString.id;
   var url = 'http://localhost:80/api/user/' + gid + '/articles';
   getAjax(url, function(data){
     data = JSON.parse(data);
-
     getArticle(data.articles);
+  });
+}
+
+function getRandomJoke() {
+  var url = 'http://localhost:80/api/joke';
+
+  getAjax(url, function(data){
+    data = JSON.parse(data);
+    window.chuck_joke.innerHTML = "";
+    var paragraph_item = document.createElement("p");
+    paragraph_item.textContent = data.value.joke;
+    window.chuck_joke.appendChild(paragraph_item);
   });
 }
 
@@ -139,7 +152,8 @@ getNewsArticles();
 getIssues();
 getUser();
 startTime();
-
+getRandomJoke();
 setInterval(showMessage, 60000 * 60);
+setInterval(getRandomJoke, 60000 * 5);
 setInterval(getNewsArticles, 60000);
 setInterval(getIssues, 300000);

@@ -11,7 +11,7 @@
     <nav>
       <div id="profile_info">
         <img :src="photo" alt="profile image">
-        <h1>{{ name }}</h1>
+        <h1 id="the_name">{{ name }}</h1>
       </div>
       <div id="clock"></div>
     </nav>
@@ -37,9 +37,7 @@
       </div>
     </main>
     <footer>
-      <div id="chuck_joke">
-
-      </div>
+      <div id="chuck_joke"></div>
     </footer>
     <script src="js/vue.js"></script>
     <script src="js/qrcode.js"></script>
@@ -47,6 +45,3 @@
     <script src="js/dashboard.js"></script>
   </body>
 </html>
-
-
-<!-- http://api.icndb.com/jokes/random?limitTo=[nerdy] -->

@@ -49,7 +49,7 @@ app.get('/api/news', getAllNewsProviders);
 app.post('/api/user/:id/news', postUserNews);
 app.get('/api/user/:id/issues', getIssues);
 app.get('/api/user/:id/articles', getNewsArticles);
-
+app.get('/api/joke', getRandomJoke);
 // static files
 app.use('/', express.static(webpages, { extensions: ['html'] }));
 app.use('/test', express.static(webpages, { extensions: ['html'] }));
@@ -210,13 +210,39 @@ function getAllNewsProviders(req, res) {
   https.request(reqOptions, callback).end();
 }
 
+// <!-- http://api.icndb.com/jokes/random?limitTo=[nerdy] -->
+
+function getRandomJoke(req, res) {
+
+  var reqOptions = {
+      host: 'api.icndb.com',
+      path: '/jokes/random?limitTo=[nerdy]',
+      method: 'GET'
+    };
+
+  callback = function(response) {
+    var str = "";
+
+    //another chunk of data has been recieved, so append it to `str`
+    response.on('data', function (chunk) {
+      str += chunk;
+    });
+
+    //the whole response has been recieved, so we just return it
+    response.on('end', function () {
+      return res.send(str);
+    });
+  };
+
+  https.request(reqOptions, callback).end();
+}
+
+
 function getIssues(req, res) {
 
   sql.query(sql.format('SELECT gittoken FROM user WHERE gid = ?', [req.params.id]), function (err, data) {
     if (err) return error(res, 'user not found', err);
     if(data.length > 0){
-
-
 
       var reqOptions = {
           host: 'api.github.com',
