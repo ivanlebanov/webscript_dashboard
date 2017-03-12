@@ -104,7 +104,7 @@ function getArticle(articles) {
   var paragraph_item = document.createElement("p");
   element.src = article.urlToImage;
   heading_item.textContent = article.title;
-  paragraph_item.textContent = article.description + " by: " + article.author;
+  paragraph_item.textContent = article.description + " By: " + article.author;
   window.newsarcticle.appendChild(element);
   div_el.appendChild(heading_item);
   div_el.appendChild(paragraph_item);
@@ -123,11 +123,23 @@ function getArticle(articles) {
   qrcode.makeCode(article.url);
 }
 
+function showMessage() {
+  window.popup.innerHTML = "";
+  window.popup.classList.remove("hidden");
+  var paragraph_item = document.createElement("p");
+  paragraph_item.textContent = 'Forget about your tasks for a minute. Strech out and chill for a moment!';
+  window.popup.appendChild(paragraph_item);
+  setTimeout(
+    function() {
+      window.popup.classList.add("hidden");
+    }, 60000);
+}
+
 getNewsArticles();
 getIssues();
+getUser();
+startTime();
 
+setInterval(showMessage, 60000 * 60);
 setInterval(getNewsArticles, 60000);
 setInterval(getIssues, 300000);
-
-window.addEventListener("load", startTime() );
-window.addEventListener("load", getUser() );

@@ -5,7 +5,7 @@
 .hidden
   display: none!important
 
-.overlay
+.overlay, #popup
   position: absolute
   top: 0!important
   left: 0
@@ -14,9 +14,21 @@
   background: #56ab2f
   background: -webkit-linear-gradient(to left, #56ab2f , #a8e063)
   background: linear-gradient(to left, #56ab2f , #a8e063)
-  opacity: .6
+  opacity: .7
   border-radius: $radius
-
+  p
+    color: $white
+    font-size: 4em
+    font-family: $heading-font
+    font-weight: 400
+    position: relative
+    top: 50%
+    text-align: center
+    padding: 0 3%
+    transform: translateY(-50%)
+#popup
+  opacity: 1!important
+  z-index: 14
 #issues.panel
   padding: 0
   & > p
