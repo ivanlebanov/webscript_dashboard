@@ -84,9 +84,50 @@ function getIssues() {
   });
 
 }
+function getNewsArticles() {
+  var gid = QueryString.id;
+  var url = 'http://localhost:80/api/user/' + gid + '/articles';
+  getAjax(url, function(data){
+    data = JSON.parse(data);
 
+    getArticle(data.articles);
+  });
+}
+
+function getArticle(articles) {
+  var article = articles[Math.floor(Math.random()*articles.length)];
+  window.newsarcticle.innerHTML = "";
+
+  var element = document.createElement("img");
+  var div_el = document.createElement("div");
+  var heading_item = document.createElement("h3");
+  var paragraph_item = document.createElement("p");
+  element.src = article.urlToImage;
+  heading_item.textContent = article.title;
+  paragraph_item.textContent = article.description + " by: " + article.author;
+  window.newsarcticle.appendChild(element);
+  div_el.appendChild(heading_item);
+  div_el.appendChild(paragraph_item);
+  window.newsarcticle.appendChild(div_el);
+
+  var qrcode = new QRCode("qr_code", {
+      text: article.url,
+      width: 128,
+      height: 128,
+      colorDark : "#000000",
+      colorLight : "#ffffff",
+      correctLevel : QRCode.CorrectLevel.H
+  });
+
+  qrcode.clear();
+  qrcode.makeCode(article.url);
+}
+
+getNewsArticles();
 getIssues();
-setTimeout(getIssues, 300000);
+
+setInterval(getNewsArticles, 60000);
+setInterval(getIssues, 300000);
 
 window.addEventListener("load", startTime() );
 window.addEventListener("load", getUser() );

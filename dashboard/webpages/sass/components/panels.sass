@@ -9,3 +9,34 @@
   background: $white
   border-radius: $radius
   width: 23%
+  &.big-panel
+    width: 43%
+    float: right
+    padding: 0
+    position: relative
+    max-height: 50vh
+    overflow: hidden
+    #qr_code
+      img
+        position: absolute
+        bottom: 15px
+        right: 15px
+        z-index: 10
+        width: 128px
+        border-radius: 0
+    div
+      position: absolute
+      z-index: 10
+      top: 10px
+      padding: 15px
+    h3
+      color: $white
+      font-size: 1.6em
+      font-family: $heading-font
+      margin-bottom: 30px
+    p
+      color: $white
+      font-size: 1.2em
+    img
+      width: 100%
+      border-radius: $radius

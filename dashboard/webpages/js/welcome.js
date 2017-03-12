@@ -12,11 +12,3 @@ function insertUser(){
 }
 
 window.addEventListener("load", insertUser);
-
-
-/**
-* I want
-* this in a config http://localhost:80/api/user?gid=
-* get rid of insertUser function and used some sort of MVC for js
-* lets do a js MVC
-*/

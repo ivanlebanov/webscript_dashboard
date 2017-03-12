@@ -4,6 +4,9 @@
 
 'use static';
 var fs = require('fs');
+var readline = require('readline');
+var google = require('googleapis');
+var googleAuth = require('google-auth-library');
 var https   = require('https');
 var express = require('express');
 var multer = require('multer');
@@ -45,6 +48,8 @@ app.get('/api/news', getAllNewsProviders);
 
 app.post('/api/user/:id/news', postUserNews);
 app.get('/api/user/:id/issues', getIssues);
+app.get('/api/user/:id/articles', getNewsArticles);
+
 // static files
 app.use('/', express.static(webpages, { extensions: ['html'] }));
 app.use('/test', express.static(webpages, { extensions: ['html'] }));
@@ -181,7 +186,7 @@ function authorized(req, res) {
 
 
 function getAllNewsProviders(req, res) {
-  //  https://api.github.com/issues?access_token=
+
   var reqOptions = {
       host: 'newsapi.org',
       path: '/v1/sources?language=en&apiKey='  + config.newsapi_key,
@@ -212,12 +217,49 @@ function getIssues(req, res) {
     if(data.length > 0){
 
 
-      //  https://api.github.com/issues?access_token=
+
       var reqOptions = {
           host: 'api.github.com',
           path: '/issues?access_token='  + data[0].gittoken,
           method: 'GET',
           headers: {'User-Agent': 'Uboard'}
+        };
+
+      callback = function(response) {
+        var str = "";
+
+        //another chunk of data has been recieved, so append it to `str`
+        response.on('data', function (chunk) {
+          str += chunk;
+        });
+
+        //the whole response has been recieved, so we just return it
+        response.on('end', function () {
+          return res.send(str);
+        });
+      };
+
+      https.request(reqOptions, callback).end();
+
+    }
+
+
+  });
+}
+
+function getNewsArticles(req, res) {
+
+  sql.query(sql.format('SELECT user_news FROM user WHERE gid = ?', [req.params.id]), function (err, data) {
+    if (err) return error(res, 'user not found', err);
+    if(data.length > 0){
+      var news = data[0].user_news.split(",");
+
+      var item = news[Math.floor(Math.random()*news.length)];
+
+      var reqOptions = {
+          host: 'newsapi.org',
+          path: '/v1/articles?source=' + item + '&language=en&apiKey='  + config.newsapi_key,
+          method: 'GET'
         };
 
       callback = function(response) {
