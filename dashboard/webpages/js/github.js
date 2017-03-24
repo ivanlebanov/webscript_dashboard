@@ -1,27 +1,32 @@
-
-function insertUser(){
+function init() {
+  'use strict';
+  let config = {};
   // getting cookie value
-  var gid = document.cookie.replace(/(?:(?:^|.*;\s*)user\s*\=\s*([^;]*).*$)|^.*$/, "$1");
-  url = 'http://localhost:80/api/user?gid=' + gid;
+  const gid = document.cookie.replace(
+    /(?:(?:^|.*;\s*)user\s*\=\s*([^;]*).*$)|^.*$/,
+    '$1');
+  function storeConfig(json) {
+    config = json;
+  }
 
-  getAjax(url, function(data){
+  fetch('js/config.json')
+    .then( extract )
+    .then( storeConfig )
+    .then( insertUser );
 
-    var jsonData = JSON.parse(data);
-    var app = new Vue({
-      el: '#name',
-      data: {
-        name: jsonData.firstname
-      }
-    });
+  function insertUser(){
+    fetch(config.base + '/api/user?gid=' + gid)
+      .then( extract )
+      .then( r => window.thename.textContent = r.firstname );
+  }
 
-  });
+  function authorizeGithubLink() {
+    const clientId = '5045e9984b7ba7e07b52';
+    const githubBase = 'https://github.com/login/oauth/authorize?client_id=';
+    window.githubAuthorize.href = githubBase + clientId + '&scope=user,repo';
+  }
 
+  authorizeGithubLink();
 }
 
-function authorizeGithub(e) {
-  e.preventDefault();
-  window.location = 'https://github.com/login/oauth/authorize?client_id=5045e9984b7ba7e07b52&scope=user,repo';
-}
-
-insertUser();
-window.github_authorize.addEventListener("click", authorizeGithub);
+init();

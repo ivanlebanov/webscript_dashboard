@@ -1,14 +1,20 @@
-function insertUser(){
-  // getting cookie value
-  var gid = document.cookie.replace(/(?:(?:^|.*;\s*)user\s*\=\s*([^;]*).*$)|^.*$/, "$1");
-  var url = 'http://localhost/api/user?gid=' + gid;
-
-  getAjax(url, function(data){
-    console.log(data);
-    var jsonData = JSON.parse(data);
-    window.fname.textContent = jsonData.firstname;
-  });
-
+let config = {};
+// getting cookie value
+const gid = document.cookie.replace(
+  /(?:(?:^|.*;\s*)user\s*\=\s*([^;]*).*$)|^.*$/,
+  '$1');
+  
+function storeConfig(json) {
+  config = json;
 }
 
-window.addEventListener("load", insertUser);
+function insertUser(){
+  fetch(config.base + '/api/user?gid=' + gid)
+    .then( extract )
+    .then( r => window.fname.textContent = r.firstname );
+}
+
+fetch('js/config.json')
+  .then( extract )
+  .then( storeConfig )
+  .then( insertUser );

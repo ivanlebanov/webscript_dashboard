@@ -15,9 +15,11 @@
   "author": "Ivan Lebanov <up719931@myport.ac.uk> (http://lebanov.me)",
   "license": "ISC",
   "devDependencies": {
+    "eslint": "^3.18.0",
+    "eslint-config-google": "^0.7.1",
+    "nodemon": "^1.11.0",
     "qnit": "^0.13.0",
-    "qunit": "^0.9.1",
-    "nodemon": "^1.11.0"
+    "qunit": "^0.9.1"
   },
   "repository": "https://github.com/ivanlebanov/webscript_dashboard.git",
   "dependencies": {

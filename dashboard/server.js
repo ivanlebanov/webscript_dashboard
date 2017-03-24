@@ -1,27 +1,23 @@
+/* jshint node: true */
 'use static';
 
 var https   = require('https');
 var express = require('express');
 var mysql = require('mysql');
+var qs = require('querystring');
 var config = require('./sql_config.json');
 var sql = mysql.createConnection(config.mysql);
 var app = express();
-var webpages = __dirname + '/webpages/';
+
+const webpages = __dirname + '/webpages/';
 
 // logging
-app.use('/', function(req, res, next) { console.log(new Date(), req.method, req.url); next(); });
+app.use('/', function(req, res, next) {
+   console.log(new Date(), req.method, req.url); next();
+ });
 
 
-// server api
-//   POST /api/pictures     - upload a picture and its title, returns {id: ..., title: ..., file: '/img/...'}
-//   GET  /api/pictures     - list pictures ordered by time from most recent, returns [like above, like above, ...]
-//         ?order=...       - ordered by title or submission time or random
-//         ?title=...       - search by title substring
-//   DELETE /api/pictures/x - returns http status code only
-
-
-// you can also provide an OAuth token to authenticate the requests
-
+// server api documentation @ /doc
 
 app.post('/api/login', login);
 app.get('/api/user', getUser);
@@ -46,18 +42,7 @@ app.use(function(req, res, next) {
 app.listen(80);
 
 
-/* server functions
- *
- *
- *    ####  ###### #####  #    # ###### #####     ###### #    # #    #  ####  ##### #  ####  #    #  ####
- *   #      #      #    # #    # #      #    #    #      #    # ##   # #    #   #   # #    # ##   # #
- *    ####  #####  #    # #    # #####  #    #    #####  #    # # #  # #        #   # #    # # #  #  ####
- *        # #      #####  #    # #      #####     #      #    # #  # # #        #   # #    # #  # #      #
- *   #    # #      #   #   #  #  #      #   #     #      #    # #   ## #    #   #   # #    # #   ## #    #
- *    ####  ###### #    #   ##   ###### #    #    #       ####  #    #  ####    #   #  ####  #    #  ####
- *
- *
- */
+/* SERVER FUNCTIONS */
 
 
 /*
@@ -74,33 +59,40 @@ function login(req, res) {
     photo: req.query.photo
   };
 
-  sql.query(sql.format('SELECT COUNT(*) AS countUsers FROM user WHERE gid = ?', [user.gid]), function (err, data) {
-    if (err) return error(res, 'failed getting user', err);
-    var response = (data[0].countUsers > 0) ? updateUser(data, user) : addUser(data, user);
+  sql.query(sql.format(
+    'SELECT COUNT(*) AS countUsers FROM user WHERE gid = ?',
+    [user.gid]), function (err, data) {
+    if (err){ return error(res, 'failed getting user', err); }
+    var response = (data[0].countUsers > 0) ?
+    updateUser(res, data, user) : addUser(res, data, user);
     res.json(response);
   });
 
 }
 
-function updateUser(data, user) {
+function updateUser(res, data, user) {
   // update existing user only fields token, photo, gid
-  sql.query(sql.format('UPDATE user SET gtoken = ? , photo = ? WHERE gid = ?', [user.gtoken, user.photo, user.gid ]), function (err, result) {
-    if (err) return error(res, 'failed sql insert', err);
+  sql.query(sql.format(
+    'UPDATE user SET gtoken = ? , photo = ? WHERE gid = ?',
+    [user.gtoken, user.photo, user.gid ]), function (err, result) {
+    if (err){ return error(res, 'failed sql insert', err); }
     return {firstName: user.firstname};
   });
 }
 
-function addUser(data, user){
+function addUser(res, data, user){
   // insert new user into the db
   sql.query(sql.format('INSERT INTO user SET ?', user), function (err, result) {
-    if (err) return error(res, 'failed sql insert', err);
+    if (err){ return error(res, 'failed sql insert', err); }
     return {firstName: user.firstname};
   });
 }
 
 function postUserNews(req, res) {
-  sql.query(sql.format('UPDATE user SET user_news = ?  WHERE gid = ?', [ req.query.sources, req.params.id ]), function (err, result) {
-    if (err) return error(res, 'failed sql insert', err);
+  sql.query(sql.format(
+    'UPDATE user SET user_news = ?  WHERE gid = ?',
+    [ req.query.sources, req.params.id ]), function (err, result) {
+    if (err){ return error(res, 'failed sql insert', err); }
     return res.json({'success' : true});
   });
 }
@@ -116,9 +108,9 @@ function authorized(req, res) {
   var gid = req.query.gid;
 
   var data = qs.stringify({
-      client_id: config.oauth_client_id, // GitHub client_id
-      client_secret: config.client_secret,  //github secret
-      code: req.query.code   //the access code we parsed earlier
+      'client_id': config.oauthClientId, // GitHub client_id
+      'client_secret': config.clientSecret,  //github secret
+      'code': req.query.code   //the access code we parsed earlier
   });
 
   var reqOptions = {
@@ -134,8 +126,10 @@ function authorized(req, res) {
       res.setEncoding('utf8');
       res.on('data', function (chunk) { body += chunk; });
       res.on('end', function() {
-        sql.query(sql.format('UPDATE user SET gittoken = ? WHERE gid = ?', [qs.parse(body).access_token, gid ]), function (err, result) {
-          if (err) return error(res, 'failed gittoken update', err);
+        sql.query(sql.format(
+          'UPDATE user SET gittoken = ? WHERE gid = ?',
+          [qs.parse(body).access_token, gid ]), function (err, result) {
+          if (err){ return error(res, 'failed gittoken update', err); }
         });
       });
   });
@@ -147,16 +141,17 @@ function authorized(req, res) {
 }
 
 
+
 function getAllNewsProviders(req, res) {
 
   var reqOptions = {
       host: 'newsapi.org',
-      path: '/v1/sources?language=en&apiKey='  + config.newsapi_key,
+      path: '/v1/sources?language=en&apiKey='  + config.newsapiKey,
       method: 'GET'
     };
 
   callback = function(response) {
-    var str = "";
+    var str = '';
 
     //another chunk of data has been recieved, so append it to `str`
     response.on('data', function (chunk) {
@@ -181,8 +176,8 @@ function getRandomJoke(req, res) {
       method: 'GET'
     };
 
-  callback = function(response) {
-    var str = "";
+  var callback = function(response) {
+    var str = '';
 
     //another chunk of data has been recieved, so append it to `str`
     response.on('data', function (chunk) {
@@ -201,84 +196,97 @@ function getRandomJoke(req, res) {
 
 function getIssues(req, res) {
 
-  sql.query(sql.format('SELECT gittoken FROM user WHERE gid = ?', [req.params.id]), function (err, data) {
-    if (err) return error(res, 'user not found', err);
-    if(data.length > 0){
+  sql.query(sql.format(
+    'SELECT gittoken FROM user WHERE gid = ?',
+    [req.params.id]), function (err, data) {
+      if (err){ return error(res, 'user not found', err); }
+      if(data.length > 0){
 
-      var reqOptions = {
-          host: 'api.github.com',
-          path: '/issues?access_token='  + data[0].gittoken,
-          method: 'GET',
-          headers: {'User-Agent': 'Uboard'}
+        var reqOptions = {
+            host: 'api.github.com',
+            path: '/issues?access_token='  + data[0].gittoken,
+            method: 'GET',
+            headers: {'User-Agent': 'Uboard'}
+          };
+
+        callback = function(response) {
+          var str = '';
+
+          //another chunk of data has been recieved, so append it to `str`
+          response.on('data', function (chunk) {
+            str += chunk;
+          });
+
+          //the whole response has been recieved, so we just return it
+          response.on('end', function () {
+            return res.send(str);
+          });
         };
 
-      callback = function(response) {
-        var str = "";
+        https.request(reqOptions, callback).end();
 
-        //another chunk of data has been recieved, so append it to `str`
-        response.on('data', function (chunk) {
-          str += chunk;
-        });
-
-        //the whole response has been recieved, so we just return it
-        response.on('end', function () {
-          return res.send(str);
-        });
-      };
-
-      https.request(reqOptions, callback).end();
-
-    }
+      }
   });
 }
 
+
 function getNewsArticles(req, res) {
 
-  sql.query(sql.format('SELECT user_news FROM user WHERE gid = ?', [req.params.id]), function (err, data) {
-    if (err) return error(res, 'user not found', err);
-    if(data.length > 0){
-      var news = data[0].user_news.split(",");
+  sql.query(sql.format(
+    'SELECT userNews FROM user WHERE gid = ?',
+    [req.params.id]), function (err, data) {
+      if (err) { return error(res, 'user not found', err); }
+      if(data.length > 0){
+        var news = data[0].userNews.split(',');
 
-      var item = news[Math.floor(Math.random()*news.length)];
-
-      var reqOptions = {
+        var item = news[Math.floor(Math.random()*news.length)];
+        var source = item + '&language=en&apiKey='  + config.newsapiKey;
+        var reqOptions = {
           host: 'newsapi.org',
-          path: '/v1/articles?source=' + item + '&language=en&apiKey='  + config.newsapi_key,
+          path: '/v1/articles?source=' + source,
           method: 'GET'
         };
 
-      callback = function(response) {
-        var str = "";
+         callback = function(response) {
+          var str = '';
 
-        //another chunk of data has been recieved, so append it to `str`
-        response.on('data', function (chunk) {
-          str += chunk;
-        });
+          //another chunk of data has been recieved, so append it to `str`
+          response.on('data', function (chunk) {
+            str += chunk;
+          });
 
-        //the whole response has been recieved, so we just return it
-        response.on('end', function () {
-          return res.send(str);
-        });
-      };
+          //the whole response has been recieved, so we just return it
+          response.on('end', function () {
+            return res.send(str);
+          });
+        };
 
-      https.request(reqOptions, callback).end();
+        https.request(reqOptions, callback).end();
 
-    }
+      }
 
   });
 }
 
 function getUser(req, res){
-  sql.query(sql.format('SELECT firstname, lastname, photo FROM user WHERE gid = ?', [req.query.gid]), function (err, data) {
-    if (err) return error(res, 'failded to load username', err);
-    if(data.length > 0)
+  sql.query(sql.format(
+    'SELECT firstname, lastname, photo FROM user WHERE gid = ?',
+    [req.query.gid]), function (err, data) {
+    if (err) { return error(res, 'failded to load username', err); }
+    if(data.length > 0){
       return res.json(data[0]);
-    else
+    }else{
       res.json(null);
+    }
+
   });
 }
 
 function error(res, msg, error) {
   res.sendStatus(500);
   console.error(msg, error);
+}
+
+function cb(message) {
+  console.log(message + ' ' + new Date());
 }

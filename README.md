@@ -1,10 +1,10 @@
 # A Dashboard for developers.
-======
+
 A simple dashboard for everyday use. Its purpose is to show most recent commits to all your repositories, entertain and help with structured information.
 
 ## Running the server
 The server is being started with the command "npm run dashboard".
-*N.B.* If you're using a mac it will require sudo rights("sudo npm run dashboard").
+**N.B.** If you're using a mac it will require sudo rights("sudo npm run dashboard").
 
 ## Functionality
 The dashboard has a few interesting functionalities:

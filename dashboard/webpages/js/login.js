@@ -1,19 +1,32 @@
+let config = {};
+
+function storeConfig(json) {
+  config = json;
+}
+
 function onSignIn(googleUser) {
-  var profile = googleUser.getBasicProfile();
-  var authResponse = googleUser.getAuthResponse();
-  var firstName = profile.getGivenName();
-  var photo = profile.getImageUrl();
-  var id = profile.getId();
-  var lastName = profile.getFamilyName();
-  var token = authResponse.id_token;
+  const profile = googleUser.getBasicProfile();
+  const authResponse = googleUser.getAuthResponse();
+  const firstName = '?firstName=' + profile.getGivenName();
+  const photo = '&photo=' + profile.getImageUrl();
+  const id = '&gid=' + profile.getId();
+  const lastName = '&lastName=' + profile.getFamilyName();
+  let token = '';
+  /* jshint ignore:start */
+  token = '&token=' + authResponse.id_token;
+  /* jshint ignore:end */
+  const profileData = firstName + lastName + token + id + photo;
 
 
-  var data = '?firstName=' + firstName+ '&lastName=' + lastName + '&token=' + token + '&gid=' + id + "&photo=" + photo;
-  var url = 'http://localhost:80/api/login';
-  url+= data;
-  postAjax(url, data, function(data){
-    document.cookie = "user=" + id;
-    window.location = 'http://localhost/welcome';
-   });
+  fetch(config.base + '/api/login/' + profileData, {
+  	method: 'post'
+  }).then(function(response) {
+    document.cookie = 'user=' + id;
+    window.location = config.base + '/welcome';
+  });
 
 }
+
+fetch('js/config.json')
+  .then( extract )
+  .then( storeConfig );
