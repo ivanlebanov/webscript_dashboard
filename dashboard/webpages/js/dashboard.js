@@ -8,36 +8,30 @@ function startTime() {
     window.clock.textContent = h + ":" + m + ":" + s;
     var t = setTimeout(startTime, 500);
 }
-function checkTime(i) {
-    if (i < 10) {i = "0" + i;}
-    return i;
-}
-
 
 function getUser() {
-  var gid = QueryString.id;
-  var url = 'http://localhost:80/api/user?gid=' + gid;
-
-  getAjax(url, function(data){
-    data = JSON.parse(data);
-
-    var profile = new Vue({
-      el: '#profile_info',
-      data: {
-        name: greeting(data.firstname + " " + data.lastname, new Date()) ,
-        photo: data.photo
-      }
+  fetch('http://localhost:80/api/user?gid=' + QueryString.id)
+    .then( extract )
+    .then(function(response) {
+      appendUser(response);
+      setInterval(function(){
+        appendUser(response);
+      },60000 * 10);
     });
+}
 
-    setInterval(function(){
-      greeting(data.firstname + " " + data.lastname, new Date(), true);
-    },60000 * 10);
-  });
-
+function appendUser(response){
+  clearHTML(window.profile_info);
+  var element = document.createElement("img");
+  element.src = response.photo;
+  window.profile_info.appendChild(element);
+  var heading_item = document.createElement("h1");
+  heading_item.textContent = greeting(response.firstname + " " + response.lastname, new Date());
+  window.profile_info.appendChild(heading_item);
 }
 
 function greeting(name, date, elem = false) {
-  var greeting = "";
+  let greeting = "";
   if(date.getHours() < 12){
     greeting = "Good morning " + name + "!";
   }else if(date.getHours() >= 12 && date.getHours() < 19 ){
@@ -52,77 +46,101 @@ function greeting(name, date, elem = false) {
 
 }
 
-
 function getIssues() {
-  var gid = QueryString.id;
-  var url = 'http://localhost:80/api/user/' + gid + "/issues";
+  fetch('http://localhost:80/api/user/' + QueryString.id + '/issues')
+    .then( extract )
+    .then(function(response) {
+      appendIssues(response);
+    });
+}
 
-  getAjax(url, function(data){
-    data = JSON.parse(data);
-    window.issue_list.innerHTML = "";
-    var has_issues = (data.length > 0) ? true : false;
-    window.issues.classList.remove("hidden");
-    if(data.length > 0){
+function appendIssues(issues) {
+  clearHTML(window.issue_list);
+  window.issues.classList.remove("hidden");
+  if(issues.length > 0){
+    appendIssueList(issues);
+  }else{
+    noIssues();
+  }
+}
 
-      for (var i = 0; i < data.length; i++) {
-        var element = document.createElement("li");
-        var heading_item = document.createElement("h3");
-        var paragraph_item = document.createElement("p");
-        heading_item.textContent = data[i].title;
-        paragraph_item.textContent = "Repository: " + data[i].repository.name + " Assigned by: " + data[i].user.login;
-        element.appendChild(heading_item);
-        element.appendChild(paragraph_item);
-        window.issue_list.appendChild(element);
-      }
+function noIssues() {
+  // add paragraph
+  var p = document.createElement("p");
+  p.textContent = "No issue at the moment";
+  window.issues.appendChild(p);
+}
 
-    }else{
-      // add paragraph
-      var p = document.createElement("p");
-      p.textContent = "No issue at the moment";
-      window.issues.appendChild(p);
-    }
+function appendIssueList(issues){
 
-  });
+  for (var i = 0; i < issues.length; i++) {
+    // create DOM elements
+    var element = document.createElement("li");
+    var heading_item = document.createElement("h3");
+    var paragraph_item = document.createElement("p");
+
+    // append data received from the API call to the DOM
+    heading_item.textContent = issues[i].title;
+    paragraph_item.textContent = "Repository: " + issues[i].repository.name + " Assigned by: " + issues[i].user.login;
+
+    // append the new DOM
+    element.appendChild(heading_item);
+    element.appendChild(paragraph_item);
+    window.issue_list.appendChild(element);
+  }
 
 }
 
+
 function getNewsArticles() {
-  var gid = QueryString.id;
-  var url = 'http://localhost:80/api/user/' + gid + '/articles';
-  getAjax(url, function(data){
-    data = JSON.parse(data);
-    getArticle(data.articles);
-  });
+  fetch('http://localhost:80/api/user/' + QueryString.id + '/articles')
+    .then( extract )
+    .then(function(response) {
+      appendArticle(response.articles);
+    });
 }
 
 function getRandomJoke() {
-  var url = 'http://localhost:80/api/joke';
-
-  getAjax(url, function(data){
-    data = JSON.parse(data);
-    window.chuck_joke.innerHTML = "";
-    var paragraph_item = document.createElement("p");
-    paragraph_item.textContent = data.value.joke;
-    window.chuck_joke.appendChild(paragraph_item);
-  });
+  fetch('http://localhost:80/api/joke')
+    .then( extract )
+    .then(function(response) {
+      appendJoke(response);
+    });
 }
 
-function getArticle(articles) {
-  var article = articles[Math.floor(Math.random()*articles.length)];
-  window.newsarcticle.innerHTML = "";
+function appendJoke(data) {
+  clearHTML(window.chuck_joke);
+  var paragraph_item = document.createElement("p");
+  paragraph_item.textContent = data.value.joke.replace(/&quot;/g, '\\"');
+  window.chuck_joke.appendChild(paragraph_item);
+}
 
+
+function appendArticle(articles) {
+  clearHTML(window.newsarcticle);
+  var article = articles[Math.floor(Math.random()*articles.length)];
+  // create DOM elements
   var element = document.createElement("img");
   var div_el = document.createElement("div");
   var heading_item = document.createElement("h3");
   var paragraph_item = document.createElement("p");
+  // in some cases the API doesn't return an image
+  if(article.urlToImage === null)
+    element.classList.add("hidden");
+  else
+    element.classList.remove("hidden");
+
+  // append data received from the API call to the DOM
   element.src = article.urlToImage;
   heading_item.textContent = article.title;
   paragraph_item.textContent = article.description + " By: " + article.author;
+
+  // append the new DOM
   window.newsarcticle.appendChild(element);
   div_el.appendChild(heading_item);
   div_el.appendChild(paragraph_item);
   window.newsarcticle.appendChild(div_el);
-
+  // create QR code
   var qrcode = new QRCode("qr_code", {
       text: article.url,
       width: 128,
@@ -131,16 +149,15 @@ function getArticle(articles) {
       colorLight : "#ffffff",
       correctLevel : QRCode.CorrectLevel.H
   });
-
   qrcode.clear();
   qrcode.makeCode(article.url);
 }
 
 function showMessage() {
-  window.popup.innerHTML = "";
+  clearHTML(window.popup);
   window.popup.classList.remove("hidden");
   var paragraph_item = document.createElement("p");
-  paragraph_item.textContent = 'Forget about your tasks for a minute. Strech out and chill for a moment!';
+  paragraph_item.textContent = 'Forget about your tasks. Strech out and chill for a moment!';
   window.popup.appendChild(paragraph_item);
   setTimeout(
     function() {
@@ -153,7 +170,8 @@ getIssues();
 getUser();
 startTime();
 getRandomJoke();
-setInterval(showMessage, 60000 * 60);
+
+setInterval(showMessage, 60000 * 10);
 setInterval(getRandomJoke, 60000 * 5);
 setInterval(getNewsArticles, 60000);
 setInterval(getIssues, 300000);

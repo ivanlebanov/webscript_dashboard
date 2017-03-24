@@ -1,7 +1,5 @@
 function getNews(){
-  var url = 'http://localhost:80/api/news';
-
-  getAjax(url, function(data){
+  getAjax('http://localhost:80/api/news', function(data){
     data = JSON.parse(data);
 
     var list = new Vue({
@@ -12,10 +10,7 @@ function getNews(){
     });
 
   });
-
 }
-
-getNews();
 
 function sendFavouriteNews(e) {
   e.preventDefault();
@@ -28,11 +23,10 @@ function sendFavouriteNews(e) {
 
   var gid = document.cookie.replace(/(?:(?:^|.*;\s*)user\s*\=\s*([^;]*).*$)|^.*$/, "$1");
 
-      var url = 'http://localhost:80/api/user/' + gid + '/news' + "?sources=" + valueObj;
-      postAjax(url, valueObj, function(data){
-        window.location = 'http://localhost:80/finished';
-      });
-
-
+  postAjax('http://localhost:80/api/user/' + gid + '/news' + "?sources=" + valueObj, valueObj, function(data){
+    window.location = 'http://localhost:80/finished';
+  });
 }
+
+getNews();
 window.save_favourite_brands.addEventListener("click", sendFavouriteNews);

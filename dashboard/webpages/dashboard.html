@@ -9,10 +9,7 @@
   <body id="dashboard">
     <div id="popup" class="hidden"></div>
     <nav>
-      <div id="profile_info">
-        <img :src="photo" alt="profile image">
-        <h1 id="the_name">{{ name }}</h1>
-      </div>
+      <div id="profile_info"></div>
       <div id="clock"></div>
     </nav>
     <main>
@@ -20,18 +17,12 @@
         <section id="issues" class="panel hidden">
           <h2>Issues:</h2>
           <div>
-            <ul id="issue_list">
-
-            </ul>
+            <ul id="issue_list"></ul>
           </div>
-
         </section>
-
         <section id="news" class="panel big-panel">
           <div class="overlay"></div>
-          <article id="newsarcticle">
-
-          </article>
+          <article id="newsarcticle"></article>
           <span id="qr_code"></span>
         </section>
       </div>
@@ -39,7 +30,6 @@
     <footer>
       <div id="chuck_joke"></div>
     </footer>
-    <script src="js/vue.js"></script>
     <script src="js/qrcode.js"></script>
     <script src="js/helpers.js"></script>
     <script src="js/dashboard.js"></script>

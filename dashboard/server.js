@@ -1,29 +1,12 @@
-/*
- * A simple example of an API-based web app that stores pictures.
- */
-
 'use static';
-var fs = require('fs');
-var readline = require('readline');
-var google = require('googleapis');
-var googleAuth = require('google-auth-library');
+
 var https   = require('https');
 var express = require('express');
-var multer = require('multer');
 var mysql = require('mysql');
-var qs = require('querystring');
-var github = require('octonode');
-
 var config = require('./sql_config.json');
 var sql = mysql.createConnection(config.mysql);
-
 var app = express();
-
-// constants for directories
 var webpages = __dirname + '/webpages/';
-var test = __dirname + '/webpages/test/';
-
-
 
 // logging
 app.use('/', function(req, res, next) { console.log(new Date(), req.method, req.url); next(); });
@@ -52,8 +35,7 @@ app.get('/api/user/:id/articles', getNewsArticles);
 app.get('/api/joke', getRandomJoke);
 // static files
 app.use('/', express.static(webpages, { extensions: ['html'] }));
-app.use('/test', express.static(webpages, { extensions: ['html'] }));
-
+// 404 not found page
 app.use(function(req, res, next) {
     var err = new Error('Not Found');
     err.status = 404;
@@ -62,7 +44,6 @@ app.use(function(req, res, next) {
 });
 // start the server
 app.listen(80);
-
 
 
 /* server functions
@@ -85,7 +66,6 @@ app.listen(80);
 */
 function login(req, res) {
   // new user object
-
   var user = {
     gid: req.query.gid,
     firstname: req.query.firstName,
@@ -94,47 +74,34 @@ function login(req, res) {
     photo: req.query.photo
   };
 
-
-    sql.query(sql.format('SELECT COUNT(*) AS countUsers FROM user WHERE gid = ?', [user.gid]), function (err, data) {
-      if (err) return error(res, 'failed getting user', err);
-
-      var response = addOrUpdateUser(data, user);
-
-      res.json(response);
-
-
-    });
-
+  sql.query(sql.format('SELECT COUNT(*) AS countUsers FROM user WHERE gid = ?', [user.gid]), function (err, data) {
+    if (err) return error(res, 'failed getting user', err);
+    var response = (data[0].countUsers > 0) ? updateUser(data, user) : addUser(data, user);
+    res.json(response);
+  });
 
 }
 
-function addOrUpdateUser(data, user) {
-  if(data[0].countUsers > 0){
+function updateUser(data, user) {
+  // update existing user only fields token, photo, gid
+  sql.query(sql.format('UPDATE user SET gtoken = ? , photo = ? WHERE gid = ?', [user.gtoken, user.photo, user.gid ]), function (err, result) {
+    if (err) return error(res, 'failed sql insert', err);
+    return {firstName: user.firstname};
+  });
+}
 
-   // update existing user only fields token, photo, gid
-   sql.query(sql.format('UPDATE user SET gtoken = ? , photo = ? WHERE gid = ?', [user.gtoken, user.photo, user.gid ]), function (err, result) {
-     if (err) return error(res, 'failed sql insert', err);
-     return {firstName: user.firstname};
-
-   });
-  }else{
-
-
-   // insert new user into the db
-   sql.query(sql.format('INSERT INTO user SET ?', user), function (err, result) {
-     if (err) return error(res, 'failed sql insert', err);
-     return {firstName: user.firstname};
-
-   });
-
-  }
+function addUser(data, user){
+  // insert new user into the db
+  sql.query(sql.format('INSERT INTO user SET ?', user), function (err, result) {
+    if (err) return error(res, 'failed sql insert', err);
+    return {firstName: user.firstname};
+  });
 }
 
 function postUserNews(req, res) {
   sql.query(sql.format('UPDATE user SET user_news = ?  WHERE gid = ?', [ req.query.sources, req.params.id ]), function (err, result) {
     if (err) return error(res, 'failed sql insert', err);
     return res.json({'success' : true});
-
   });
 }
 
@@ -145,14 +112,12 @@ function GitAuth(req, res) {
   res.end();
 }
 
-
-
 function authorized(req, res) {
   var gid = req.query.gid;
 
   var data = qs.stringify({
-      client_id: config.oauth_client_id, //your GitHub client_id
-      client_secret: config.client_secret,  //and secret
+      client_id: config.oauth_client_id, // GitHub client_id
+      client_secret: config.client_secret,  //github secret
       code: req.query.code   //the access code we parsed earlier
   });
 
@@ -169,12 +134,9 @@ function authorized(req, res) {
       res.setEncoding('utf8');
       res.on('data', function (chunk) { body += chunk; });
       res.on('end', function() {
-
         sql.query(sql.format('UPDATE user SET gittoken = ? WHERE gid = ?', [qs.parse(body).access_token, gid ]), function (err, result) {
           if (err) return error(res, 'failed gittoken update', err);
-
         });
-
       });
   });
 
@@ -210,7 +172,6 @@ function getAllNewsProviders(req, res) {
   https.request(reqOptions, callback).end();
 }
 
-// <!-- http://api.icndb.com/jokes/random?limitTo=[nerdy] -->
 
 function getRandomJoke(req, res) {
 
@@ -268,8 +229,6 @@ function getIssues(req, res) {
       https.request(reqOptions, callback).end();
 
     }
-
-
   });
 }
 
@@ -306,7 +265,6 @@ function getNewsArticles(req, res) {
 
     }
 
-
   });
 }
 
@@ -316,7 +274,7 @@ function getUser(req, res){
     if(data.length > 0)
       return res.json(data[0]);
     else
-      res.json({});
+      res.json(null);
   });
 }
 
