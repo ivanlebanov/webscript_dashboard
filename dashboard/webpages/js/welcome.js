@@ -3,7 +3,7 @@ let config = {};
 const gid = document.cookie.replace(
   /(?:(?:^|.*;\s*)user\s*\=\s*([^;]*).*$)|^.*$/,
   '$1');
-  
+
 function storeConfig(json) {
   config = json;
 }

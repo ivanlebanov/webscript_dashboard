@@ -13,6 +13,9 @@ The dashboard has a few interesting functionalities:
 + uses http://icndb.com to provide a random joke changing every now and then
 + shows a popup message reminding you to stretch out every half hour
 
+## API documentation
+The API documentation can be accessed on /doc.
+
 ## Future enhancements:
 + documentation
 + advertisements

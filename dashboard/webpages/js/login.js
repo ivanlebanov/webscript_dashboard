@@ -17,14 +17,12 @@ function onSignIn(googleUser) {
   /* jshint ignore:end */
   const profileData = firstName + lastName + token + id + photo;
 
-
   fetch(config.base + '/api/login/' + profileData, {
   	method: 'post'
   }).then(function(response) {
-    document.cookie = 'user=' + id;
-    window.location = config.base + '/welcome';
+    document.cookie = 'user=' + profile.getId();
+    window.location = config.base + '/dashboards';
   });
-
 }
 
 fetch('js/config.json')

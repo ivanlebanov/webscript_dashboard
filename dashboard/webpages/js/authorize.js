@@ -5,9 +5,11 @@ function init(){
   const gid = document.cookie.replace(
     /(?:(?:^|.*;\s*)user\s*\=\s*([^;]*).*$)|^.*$/,
     '$1');
+
   function storeConfig(json) {
     config = json;
   }
+
   function redirectToAuthorized() {
     const code = QueryString.code;
     fetch(config.base + '/api/authorize?gid=' + gid + '&code=' + code, {
@@ -16,5 +18,11 @@ function init(){
       window.location = config.base + '/authorized';
     });
   }
+
+  fetch('js/config.json')
+    .then( extract )
+    .then( storeConfig )
+    .then( redirectToAuthorized );
+
 }
 init();
