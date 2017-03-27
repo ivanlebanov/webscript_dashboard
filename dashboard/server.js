@@ -7,10 +7,19 @@ var mysql = require('mysql');
 var qs = require('querystring');
 var config = require('./sql_config.json');
 var sql = mysql.createConnection(config.mysql);
+var bodyParser = require('body-parser');
 var app = express();
 
 const webpages = __dirname + '/webpages/';
 
+app.use(bodyParser.urlencoded({
+    extended: true
+}));
+
+/**bodyParser.json(options)
+ * Parses the text as JSON and exposes the resulting object on req.body.
+ */
+app.use(bodyParser.json());
 // logging
 app.use('/', function(req, res, next) {
    console.log(new Date(), req.method, req.url); next();
@@ -25,14 +34,19 @@ app.get('/github_authorized', GitAuth);
 app.post('/api/authorize', authorized);
 app.get('/api/user/:id/issues', getIssues);
 
+// dashboards
+app.get('/api/dashboards/:gid', getUserDashboards);
+app.post('/api/dashboard/:gid', postUserDashboards);
+
 // News
 app.get('/api/news', getAllNewsProviders);
-app.post('/api/user/:id/news', postUserNews);
+app.post('/api/dashboard/:id/news', postUserNews);
 app.get('/api/user/:id/articles', getNewsArticles);
 // Joke
 app.get('/api/joke', getRandomJoke);
 // static files
 app.use('/', express.static(webpages, { extensions: ['html'] }));
+
 // 404 not found page
 app.use(function(req, res, next) {
     var err = new Error('Not Found');
@@ -96,7 +110,7 @@ function updateUser(res, data, user) {
   sql.query(sql.format(
     'UPDATE user SET gtoken = ? , photo = ? WHERE gid = ?',
     [user.gtoken, user.photo, user.gid ]), function (err, result) {
-    if (err){ return error(res, 'failed sql insert', err); }
+    if (err){ return error(res, 'failed sql user update', err); }
     return {firstName: user.firstname};
   });
 }
@@ -104,7 +118,7 @@ function updateUser(res, data, user) {
 function addUser(res, data, user){
   // insert new user into the db
   sql.query(sql.format('INSERT INTO user SET ?', user), function (err, result) {
-    if (err){ return error(res, 'failed sql insert', err); }
+    if (err){ return error(res, 'failed sql user insert', err); }
     return {firstName: user.firstname};
   });
 }
@@ -139,6 +153,41 @@ function getUser(req, res){
     }else{
       res.json(null);
     }
+
+  });
+}
+
+function getUserDashboards(req, res) {
+  sql.query(sql.format(
+    'SELECT * FROM dashboard WHERE gid = ?',
+    [req.params.gid]), function (err, data) {
+    if (err) { return error(res, 'failded to load username', err); }
+    if(data.length > 0){
+      return res.json(data);
+    }else{
+      res.json([]);
+    }
+
+  });
+}
+
+function postUserDashboards(req,res) {
+  var postParams = {
+    title: req.body.title,
+    gid: req.params.gid
+  };
+  sql.query(sql.format(
+    'INSERT INTO dashboard SET ?',
+    postParams), function (err, data) {
+    if (err) { return error(res, 'failded to create dashboard', err); }
+    console.log(data);
+
+    return res.json({
+      status: 'success',
+      message: 'Successfully created a dashboard.',
+      data: data
+    });
+
 
   });
 }
@@ -342,11 +391,16 @@ function getNewsArticles(req, res) {
 */
 function postUserNews(req, res) {
   sql.query(sql.format(
-    'UPDATE user SET user_news = ?  WHERE gid = ?',
-    [ req.query.sources, req.params.id ]), function (err, result) {
-    if (err){ return error(res, 'failed sql insert', err); }
-    return res.json({'success' : true});
-  });
+    'UPDATE dashboard SET userNews = ?  WHERE gid = ? AND id = ?',
+    [ req.query.sources, req.query.gid , req.params.id ]),
+     function (err, result) {
+       if (err){ return error(res, 'failed sql insert', err); }
+
+       return res.json({
+          status  : 'success',
+          message : 'Successfully selected news'
+        });
+    });
 }
 
 /**

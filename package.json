@@ -22,6 +22,7 @@
   },
   "repository": "https://github.com/ivanlebanov/webscript_dashboard.git",
   "dependencies": {
+    "body-parser": "^1.17.1",
     "express": "^4.14.0",
     "mysql": "^2.12.0",
     "querystring": "^0.2.0"

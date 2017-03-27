@@ -3,12 +3,23 @@ function init() {
   const gid = document.cookie.replace(
     /(?:(?:^|.*;\s*)user\s*\=\s*([^;]*).*$)|^.*$/,
     '$1');
+  const dashboard = localStorage.getItem('dashboard');
+  let config = {};
 
-  function getLink(){
-    window.link.href = 'http://localhost:80/dashboard?id=' + gid;
+  function storeConfig(json) {
+    config = json;
   }
 
-  getLink();
+  function getLink(){
+    window.link.href = config.base + '/dashboard?secret=' + gid+
+    '&id=' + dashboard;
+    window.para.textContent +=' ' + config.base + '/dashboard?secret=' + gid+
+    '&id=' + dashboard;
+  }
+  fetch('js/config.json')
+    .then( extract )
+    .then( storeConfig )
+    .then( getLink );
 }
 
 init();

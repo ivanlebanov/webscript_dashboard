@@ -14,6 +14,26 @@ function checkTime(i) {
     return i;
 }
 
+function showMessage(status, message, reload = false){
+  let divElem = document.createElement('div');
+  let para = document.createElement('p');
+  divElem.classList.add('message');
+  divElem.classList.add(status);
+  divElem.id = 'message';
+  para.textContent = message;
+  divElem.appendChild(para);
+  document.body.appendChild(divElem);
+  setTimeout(
+    function() {
+      document.body.removeChild(window.message);
+
+    }, 4000);
+
+
+}
+function hideMessage(status, message){
+
+}
 var QueryString = function () {
   // This function is anonymous, is executed immediately and
   // the return value is assigned to QueryString!

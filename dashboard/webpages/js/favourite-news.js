@@ -50,11 +50,21 @@ function init(){
         valueObj[i] = checkedBoxes[i].value;
       }
     }
-    fetch(config.base + '/api/user/' + gid + '/news' + '?sources=' + valueObj, {
+    fetch(config.base + '/api/dashboard/' + QueryString.id + '/news' +
+     '?sources=' + valueObj + '&gid=' + gid, {
     	method: 'post'
-    }).then(function(response) {
-      window.location = config.base + '/finished';
-    });
+    })
+    .then( extract )
+    .then( r =>  showMessage(r.status,r.message) )
+    .then(redirectFinishedPage);
+
+  }
+
+  function redirectFinishedPage() {
+    setTimeout(
+      function() {
+        window.location = config.base + '/finished';
+      }, 4000);
 
   }
   fetch('js/config.json')

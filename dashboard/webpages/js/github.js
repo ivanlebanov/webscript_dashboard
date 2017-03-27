@@ -23,6 +23,7 @@ function init() {
   function authorizeGithubLink() {
     const clientId = '5045e9984b7ba7e07b52';
     const githubBase = 'https://github.com/login/oauth/authorize?client_id=';
+    localStorage.setItem('dashboard', QueryString.id);
     window.githubAuthorize.href = githubBase + clientId + '&scope=user,repo';
   }
 

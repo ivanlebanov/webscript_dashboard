@@ -6,7 +6,8 @@
     "QRCode": true,
     "checkTime": true,
     "getCheckedBoxes": true,
-    "callback": true
+    "callback": true,
+    "showMessage": true
   },
 	"camelcase" : true,
 	"indent": 2,

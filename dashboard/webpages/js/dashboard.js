@@ -2,8 +2,8 @@ function init(){
   'use strict';
   let config = {};
   // getting cookie value
-  const gid =  QueryString.id;
-
+  const gid =  QueryString.secret;
+  const id =  QueryString.id;
   function storeConfig(json) {
     config = json;
   }
@@ -31,7 +31,7 @@ function init(){
   }
 
   function getUser() {
-    fetch(config.base + '/api/user?gid=' + QueryString.id)
+    fetch(config.base + '/api/user?gid=' + gid)
       .then( extract )
       .then(function(response) {
         appendUser(response);
@@ -56,7 +56,7 @@ function init(){
   }
 
   function getIssues() {
-    fetch(config.base + '/api/user/' + QueryString.id + '/issues')
+    fetch(config.base + '/api/user/' + gid + '/issues')
       .then( extract )
       .then(function(response) {
         appendIssues(response);
@@ -103,7 +103,7 @@ function init(){
 
 
   function getNewsArticles() {
-    fetch(config.base + '/api/user/' + QueryString.id + '/articles')
+    fetch(config.base + '/api/user/' + gid + '/articles')
       .then( extract )
       .then(function(response) {
         appendArticle(response.articles);

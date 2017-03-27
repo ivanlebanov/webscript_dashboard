@@ -4,9 +4,43 @@
   background: $bg-grey
 .hidden
   display: none!important
-
-.overlay, #popup
-  position: absolute
+.popup
+  opacity: 1!important
+  h2
+    padding: 15px 4%
+    text-align: left
+    color: $white
+    background: $grey
+    font-size: 1.3em
+    border-top: 2px solid $grey
+    font-family: $heading-font
+  label
+    float: left
+    font-size: 1.1em
+    color: $grey
+  .innerPopup
+    position: relative
+    top: 50%
+    text-align: center
+    padding: 0
+    overflow: auto
+    max-height: 90vh
+    max-width: 700px
+    background: $white
+    border-radius: $radius
+    transform: translateY(-50%)
+    margin: auto
+    .inner
+      padding: 2% 4%
+  #closePopup
+    position: absolute
+    z-index: 20
+    right: 10px
+    top: 10px
+    cursor: pointer
+    width: 50px
+.overlay, #popup, .popup
+  position: fixed
   top: 0!important
   left: 0
   right: 0
@@ -16,6 +50,8 @@
   background: linear-gradient(to left, #134E5E , #71B280)
   opacity: .7
   border-radius: $radius
+  z-index: 10
+
   p
     color: $white
     font-size: 4em

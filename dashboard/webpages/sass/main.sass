@@ -42,3 +42,32 @@ html
       max-width: 33%
       max-height: 20px
       width: auto
+#dashboards
+  overflow: hidden
+  li
+    border-bottom: 3px solid $light-blue
+    display: block
+    float: left
+    width: 100%
+    color: $grey
+  h2
+    font-size: 1.5em
+    text-transform: uppercase
+    font-family: $heading-font
+  p
+    font-size: 1em
+
+.message
+  width: 20vw
+  min-width: 100px
+  border-radius: $radius
+  background: $red
+  padding: 20px
+  z-index: 40
+  position: fixed
+  top: 40px
+  right: 40px
+  &.success
+    background: $green
+  p
+    color: $white
