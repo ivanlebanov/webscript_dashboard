@@ -44,7 +44,7 @@ app.put('/api/dashboard/:gid/:id', updteUserDashboard);
 
 // News
 app.get('/api/news', getAllNewsProviders);
-app.get('/api/dashboard/articles', getNewsArticles);
+app.get('/api/dashboard/:gid/:id/articles', getNewsArticles);
 app.post('/api/dashboard/:id/news', postUserNews);
 // Joke
 app.get('/api/joke', getRandomJoke);
@@ -230,8 +230,8 @@ function postUserDashboard(req,res) {
 function updteUserDashboard(req, res) {
 
   sql.query(sql.format(
-    'UPDATE dashboard SET title = ? , showIssues = ?, showJoke = ?, showNews = ?' +
-    ' WHERE gid = ? AND id = ?',
+    'UPDATE dashboard SET title = ? , showIssues = ?,' +
+    'showJoke = ?, showNews = ? WHERE gid = ? AND id = ?',
     [req.body.title, req.body.showIssues, req.body.showJoke, req.body.showNews,
     req.params.gid, req.params.id]
   ), function (err, data) {
@@ -399,7 +399,7 @@ function getNewsArticles(req, res) {
 
   sql.query(sql.format(
     'SELECT userNews FROM dashboard WHERE id = ? AND gid = ?',
-    [req.query.id, req.query.gid]), function (err, data) {
+    [req.params.id, req.params.gid]), function (err, data) {
       if (err) { return error(res, 'user not found', err); }
       if(data.length > 0){
         var news = data[0].userNews.split(',');
@@ -454,7 +454,8 @@ function getNewsArticles(req, res) {
 */
 function postUserNews(req, res) {
   sql.query(sql.format(
-    'UPDATE dashboard SET userNews = ? , finishedSetup = 1  WHERE gid = ? AND id = ?',
+    'UPDATE dashboard SET userNews = ? , finishedSetup = 1 ' +
+    ' WHERE gid = ? AND id = ?',
     [ req.query.sources, req.query.gid , req.params.id ]),
      function (err, result) {
        if (err){ return error(res, 'failed sql insert', err); }

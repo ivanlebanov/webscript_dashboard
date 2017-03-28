@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node dashboard/server",
     "nodemon": "node_modules/.bin/nodemon -i dashboard/webpages/ dashboard/server",
-    "dashboard": "node_modules/.bin/nodemon -i dashboard/webpages/ dashboard/server",
+    "dashboard": "node_modules/.bin/forever start ./dashboard/server.js",
     "initsql": "mysql -u root -p < dashboard/sql_init.sql"
   },
   "keywords": [
@@ -24,6 +24,7 @@
   "dependencies": {
     "body-parser": "^1.17.1",
     "express": "^4.14.0",
+    "forever": "^0.15.3",
     "mysql": "^2.12.0",
     "querystring": "^0.2.0"
   }

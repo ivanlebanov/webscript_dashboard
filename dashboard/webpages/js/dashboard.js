@@ -1,6 +1,7 @@
 function init(){
   'use strict';
   let config = {};
+  let dashboard = {};
   // getting cookie value
   const gid =  QueryString.secret;
   const id =  QueryString.id;
@@ -18,7 +19,10 @@ function init(){
       window.clock.textContent = h + ':' + m + ':' + s;
       setTimeout(startTime, 500);
   }
-
+  function storeDatabaseInfo(json) {
+    dashboard = json;
+    console.log(dashboard);
+  }
   function appendUser(response){
     clearHTML(window.profileInfo);
     let element = document.createElement('img');
@@ -56,16 +60,20 @@ function init(){
   }
 
   function getIssues() {
-    fetch(config.base + '/api/user/' + gid + '/issues')
-      .then( extract )
-      .then(function(response) {
-        appendIssues(response);
-      });
+    if(dashboard.showIssues == 1){
+      showElement(window.issues);
+      fetch(config.base + '/api/user/' + gid + '/issues')
+        .then( extract )
+        .then(function(response) {
+          appendIssues(response);
+        });
+      }else{
+        hideElement(window.issues);
+      }
   }
 
   function appendIssues(issues) {
     clearHTML(window.issueList);
-    window.issues.classList.remove('hidden');
     if(issues.length > 0){
       appendIssueList(issues);
     }else{
@@ -103,17 +111,27 @@ function init(){
 
 
   function getNewsArticles() {
+    if(dashboard.showNews == 1){
+      // api/dashboard/:gid/:id/articles
+      fetch(config.base + '/api/dashboard/' + gid + '/'+ id +'/articles')
+        .then( extract )
+        .then( r => appendArticle(r.articles));
+    }else{
+      hideElement(window.news);
+    }
 
-    fetch(config.base + '/api/dashboard/articles/'  +
-     '?id=' + id + '&gid=' + gid)
-      .then( extract )
-      .then( r => appendArticle(r.articles));
   }
 
   function getRandomJoke() {
-    fetch(config.base + '/api/joke')
-      .then( extract )
-      .then( r => appendJoke(r) );
+    if(dashboard.showJoke == 1){
+      showElement(window.chuckJoke);
+      fetch(config.base + '/api/joke')
+        .then( extract )
+        .then( r => appendJoke(r) );
+    }else{
+      hideElement(window.chuckJoke);
+    }
+
   }
 
   function appendJoke(data) {
@@ -125,6 +143,7 @@ function init(){
 
 
   function appendArticle(articles) {
+    showElement(window.news);
     clearHTML(window.newsarcticle);
     let article = articles[Math.floor(Math.random()*articles.length)];
     // create DOM elements
@@ -169,23 +188,54 @@ function init(){
       }, 60000);
   }
   function initalizeDashboard() {
-    getNewsArticles();
-    getIssues();
     getUser();
     startTime();
-    getRandomJoke();
+    if(dashboard.showNews == 1){
+      getNewsArticles();
+    }else{
+      hideElement(window.news);
+    }
+    if(dashboard.showIssues == 1){
+      getIssues();
+    }else{
+      hideElement(window.issues);
+    }
+    if(dashboard.showJoke == 1){
+      getRandomJoke();
+    }else{
+      hideElement(window.chuckJoke);
+    }
   }
 
+function hideElement(elem) {
+  elem.classList.add('hidden');
+}
 
+function showElement(elem) {
+  elem.classList.remove('hidden');
+}
+function getDashboardData() {
+    fetch(config.base + '/api/dashboard/' + gid + '/' + id)
+      .then( extract )
+      .then( storeDatabaseInfo )
+      .then( initalizeDashboard );
+}
   fetch('js/config.json')
     .then( extract )
     .then( storeConfig )
-    .then( initalizeDashboard );
+    .then( getDashboardData );
+
+function getDashboardDataOnly() {
+  fetch(config.base + '/api/dashboard/' + gid + '/' + id)
+    .then( extract )
+    .then( storeDatabaseInfo );
+}
+  setInterval(getDashboardDataOnly, 10000);
 
   setInterval(showMessage, 60000 * 30);
   setInterval(getRandomJoke, 60000 * 5);
   setInterval(getNewsArticles, 60000);
-  setInterval(getIssues, 300000);
+  setInterval(getIssues, 15000);
 
 }
 init();
