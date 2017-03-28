@@ -23,6 +23,8 @@ function appendDashboards(dashboards) {
       let liElem = document.createElement('li');
       let headingElem = document.createElement('h2');
       let linkElem = document.createElement('a');
+      let secondLinkElem = document.createElement('a');
+      let lastLinkElem = document.createElement('a');
       let paraElem = document.createElement('p');
       headingElem.textContent = dashboards[i].title;
       paraElem.textContent = 'Link to your dashboard: ' + config.base +
@@ -39,19 +41,84 @@ function appendDashboards(dashboards) {
          linkElem.textContent = 'configure dashboard';
          linkElem.href = config.base +  '/welcome?id=' + dashboards[i].id;
        }
+
+      secondLinkElem.textContent = 'Advanced settings';
+      secondLinkElem.dataset.id = dashboards[i].id;
+      secondLinkElem.dataset.title = dashboards[i].title;
+      secondLinkElem.classList.add('chooseSettings');
+      secondLinkElem.classList.add('white-button');
+      secondLinkElem.classList.add('small-button');
+
+      lastLinkElem.textContent = 'Delete dashboard';
+      lastLinkElem.dataset.id = dashboards[i].id;
+      lastLinkElem.dataset.title = dashboards[i].title;
+      lastLinkElem.classList.add('deleteDashboard');
+      lastLinkElem.classList.add('red-button');
+      lastLinkElem.classList.add('small-button');
+
       linkElem.classList.add('green-button');
       linkElem.classList.add('small-button');
       liElem.appendChild(headingElem);
       liElem.appendChild(paraElem);
       liElem.appendChild(linkElem);
+      liElem.appendChild(secondLinkElem);
+      liElem.appendChild(lastLinkElem);
       window.dashboards.appendChild(liElem);
     }
-  }else{
+
+    var deleteLinks = document.querySelectorAll('.deleteDashboard');
+
+    Array.from(deleteLinks).forEach(link => {
+        link.addEventListener('click', function(event) {
+          showDeletePopup(this.dataset.id, this.dataset.title);
+        });
+    });
+
+    var settingsLinks = document.querySelectorAll('.chooseSettings');
+
+    Array.from(settingsLinks).forEach(link => {
+        link.addEventListener('click', function(event) {
+          chooseSettings(this.dataset.id, this.dataset.title);
+        });
+    });
 
   }
+
 }
+
+function chooseSettings(id, title) {
+  fetch(config.base + '/api/dashboard/' + gid + '/' + id)
+  .then( extract )
+  .then( r => showUpdatePopup(r) );
+}
+
+function showUpdatePopup(dashboard) {
+  window.titleUpdate.value = dashboard.title;
+  window.showIssues.checked = (dashboard.showIssues == 1) ? true : false;
+  window.showJoke.checked = (dashboard.showJoke == 1) ? true : false;
+  window.showNews.checked = (dashboard.showNews == 1) ? true : false;
+  window.updateDashboard.dataset.id = dashboard.id;
+
+  window.popupEdit.classList.remove('hidden');
+}
+
+function showDeletePopup(id, title) {
+  if (confirm(`sure u want to delete ${title}`)) {
+      fetch(config.base + '/api/dashboard/' + gid + '/' + id , {
+        method: 'delete'
+      })
+      .then( extract )
+      .then( r => showMessage(r.status, r.message, false) )
+      .then(getUserDashboards)
+      .then(closeThePopup);
+  }
+}
+
 function closeThePopup(){
   window.popupAdd.classList.add('hidden');
+}
+function closeThePopupEdit() {
+  window.popupEdit.classList.add('hidden');
 }
 function addThedashboard() {
   fetch(config.base + '/api/dashboard/' + gid , {
@@ -69,6 +136,27 @@ function addThedashboard() {
   .then(getUserDashboards)
   .then(closeThePopup);
 }
+function updateTheDashboard() {
+  let id = this.dataset.id;
+  let params = {
+    'title': window.titleUpdate.value,
+    'showIssues': (window.showIssues.checked) ? 1 : 0,
+    'showJoke': (window.showJoke.checked) ? 1 : 0,
+    'showNews': (window.showNews.checked) ? 1 : 0
+  };
+  fetch(config.base + '/api/dashboard/' + gid + '/' + id , {
+    method: 'put',
+    headers: {
+      'Accept': 'application/json, application/xml, text/plain, text/html, *.*',
+      'Content-Type': 'application/json'
+      },
+    body: JSON.stringify(params)
+  })
+  .then( extract )
+  .then( r => showMessage(r.status, r.message, false) )
+  .then(getUserDashboards)
+  .then(closeThePopupEdit);
+}
 function openPopup(e) {
   e.preventDefault();
   window.popupAdd.classList.remove('hidden');
@@ -76,7 +164,8 @@ function openPopup(e) {
 window.addDashboard.addEventListener('click', addThedashboard);
 window.createDashboard.addEventListener('click', openPopup);
 window.closePopup.addEventListener('click', closeThePopup);
-
+window.closePopupEdit.addEventListener('click', closeThePopupEdit);
+window.updateDashboard.addEventListener('click', updateTheDashboard);
 fetch('js/config.json')
   .then( extract )
   .then( storeConfig )

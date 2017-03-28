@@ -36,12 +36,16 @@ app.get('/api/user/:id/issues', getIssues);
 
 // dashboards
 app.get('/api/dashboards/:gid', getUserDashboards);
-app.post('/api/dashboard/:gid', postUserDashboards);
+app.get('/api/dashboard/:gid/:id', getSingleDashboard);
+app.delete('/api/dashboard/:gid/:id', deleteSingleDashboard);
+app.post('/api/dashboard/:gid', postUserDashboard);
+app.put('/api/dashboard/:gid/:id', updteUserDashboard);
+
 
 // News
 app.get('/api/news', getAllNewsProviders);
+app.get('/api/dashboard/articles', getNewsArticles);
 app.post('/api/dashboard/:id/news', postUserNews);
-app.get('/api/user/:id/articles', getNewsArticles);
 // Joke
 app.get('/api/joke', getRandomJoke);
 // static files
@@ -170,22 +174,73 @@ function getUserDashboards(req, res) {
 
   });
 }
+function getSingleDashboard(req, res) {
+  sql.query(sql.format(
+    'SELECT * FROM dashboard WHERE gid = ? AND id = ?',
+    [req.params.gid, req.params.id]), function (err, data) {
+    if (err) { return error(res, 'failded to load username', err); }
+    if(data.length > 0){
+      return res.json(data[0]);
+    }else{
+      res.json([]);
+    }
 
-function postUserDashboards(req,res) {
+  });
+}
+
+function deleteSingleDashboard(req, res) {
+  sql.query(sql.format(
+    'DELETE FROM dashboard WHERE gid = ? AND id = ?',
+    [req.params.gid, req.params.id]), function (err, data) {
+    if (err) { return error(res, 'failded to load username', err); }
+
+      return res.json({
+        status: 'success',
+        message: 'Successfully deleted the dashboard.',
+      });
+
+  });
+}
+
+function postUserDashboard(req,res) {
   var postParams = {
     title: req.body.title,
-    gid: req.params.gid
+    gid: req.params.gid,
+    showIssues: 1,
+    showJoke: 1,
+    showNews: 1,
+    finishedSetup: 0
   };
   sql.query(sql.format(
     'INSERT INTO dashboard SET ?',
     postParams), function (err, data) {
     if (err) { return error(res, 'failded to create dashboard', err); }
-    console.log(data);
+
 
     return res.json({
       status: 'success',
       message: 'Successfully created a dashboard.',
       data: data
+    });
+
+
+  });
+}
+
+function updteUserDashboard(req, res) {
+
+  sql.query(sql.format(
+    'UPDATE dashboard SET title = ? , showIssues = ?, showJoke = ?, showNews = ?' +
+    ' WHERE gid = ? AND id = ?',
+    [req.body.title, req.body.showIssues, req.body.showJoke, req.body.showNews,
+    req.params.gid, req.params.id]
+  ), function (err, data) {
+    if (err) { return error(res, 'failded to update dashboard', err); }
+
+
+    return res.json({
+      status: 'success',
+      message: 'Successfully updated dashboard.',
     });
 
 
@@ -328,12 +383,13 @@ function getAllNewsProviders(req, res) {
 }
 
 /**
- * @api {get} /api/user/:id/articles Get Random News Articles List
+ * @api {get} /api/dashboard/:id/articles Get Random News Articles List
  * @apiName getNewsArticles
  * @apiVersion 1.0.0
  * @apiGroup News
  *
- * @apiParam {String} id Users Google unique ID.
+ * @apiParam {String} id dashboard's ID
+ * @apiParam {String} gid Users Google unique ID.
  *
  * @apiDescription Makes an https request to the NewsAPI
  * to list recent articles for a random provider
@@ -342,8 +398,8 @@ function getAllNewsProviders(req, res) {
 function getNewsArticles(req, res) {
 
   sql.query(sql.format(
-    'SELECT userNews FROM user WHERE gid = ?',
-    [req.params.id]), function (err, data) {
+    'SELECT userNews FROM dashboard WHERE id = ? AND gid = ?',
+    [req.query.id, req.query.gid]), function (err, data) {
       if (err) { return error(res, 'user not found', err); }
       if(data.length > 0){
         var news = data[0].userNews.split(',');
@@ -358,10 +414,16 @@ function getNewsArticles(req, res) {
 
          callback = function(response) {
           var str = '';
+
           //another chunk of data has been recieved, so append it to `str`
-          response.on('data', function (chunk) { str += chunk; });
+          response.on('data', function (chunk) {
+            str += chunk;
+          });
+
           //the whole response has been recieved, so we just return it
-          response.on('end', function () { return res.send(str); });
+          response.on('end', function () {
+            return res.send(str);
+          });
         };
 
         https.request(reqOptions, callback).end();
@@ -370,14 +432,14 @@ function getNewsArticles(req, res) {
 
   });
 }
-
 /**
- * @api {post} /api/user/:id/news Save Prefered News providers
+ * @api {post} /api/dashboard/:id/news Save Prefered News providers
  * @apiName postUserNews
  * @apiVersion 1.0.0
  * @apiGroup News
  *
- * @apiParam {String} id Users Google unique ID.
+ * @apiParam {String} id dashboard's ID.
+ * @apiParam {String} gid Users Google unique ID.
  * @apiParam {String} sources comma separated list of provider ids
  *
  * @apiSuccessExample Success-Response:
@@ -387,11 +449,12 @@ function getNewsArticles(req, res) {
  *     }
  *
  * @apiDescription Saves the unique news identifiers in the
- * database.
+ * database for the specific dashboard and sets the
+ * finishedSetup flag to 1.
 */
 function postUserNews(req, res) {
   sql.query(sql.format(
-    'UPDATE dashboard SET userNews = ?  WHERE gid = ? AND id = ?',
+    'UPDATE dashboard SET userNews = ? , finishedSetup = 1  WHERE gid = ? AND id = ?',
     [ req.query.sources, req.query.gid , req.params.id ]),
      function (err, result) {
        if (err){ return error(res, 'failed sql insert', err); }
@@ -422,7 +485,7 @@ function postUserNews(req, res) {
  *      }
  *
  * @apiDescription Returns json object with a random joke from
- * the nerdy category.
+ * the nerdy category if the icdnb api(https://icndb.com).
 */
 function getRandomJoke(req, res) {
 
@@ -449,5 +512,5 @@ function error(res, msg, error) {
 }
 
 function cb(message) {
-  console.log(message + ' ' + new Date());
+  console.error(message + ' ' + new Date());
 }

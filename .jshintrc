@@ -7,7 +7,8 @@
     "checkTime": true,
     "getCheckedBoxes": true,
     "callback": true,
-    "showMessage": true
+    "showMessage": true,
+    "confirm": true
   },
 	"camelcase" : true,
 	"indent": 2,

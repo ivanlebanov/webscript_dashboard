@@ -1,5 +1,9 @@
 // main: ../styles.sass
 @import ../variables
+.checkbox
+  display: block
+  float: left
+
 input[type="checkbox"]
   display: none!important
   + label
@@ -14,8 +18,8 @@ input[type="checkbox"]:checked
       color: $white
 
 input[type="text"]
-  border: 2px solid $light-blue
-  background: $light-blue
+  border: 2px solid $bg-grey
+  background: $bg-grey
   border-radius: $radius
   display: block
   float: left

@@ -76,7 +76,7 @@ function init(){
   function noIssues() {
     // add paragraph
     let p = document.createElement('p');
-    p.textContent = 'No issue at the moment';
+    p.textContent = 'No issues at the moment.';
     window.issues.appendChild(p);
   }
 
@@ -103,19 +103,17 @@ function init(){
 
 
   function getNewsArticles() {
-    fetch(config.base + '/api/user/' + gid + '/articles')
+
+    fetch(config.base + '/api/dashboard/articles/'  +
+     '?id=' + id + '&gid=' + gid)
       .then( extract )
-      .then(function(response) {
-        appendArticle(response.articles);
-      });
+      .then( r => appendArticle(r.articles));
   }
 
   function getRandomJoke() {
     fetch(config.base + '/api/joke')
       .then( extract )
-      .then(function(response) {
-        appendJoke(response);
-      });
+      .then( r => appendJoke(r) );
   }
 
   function appendJoke(data) {
