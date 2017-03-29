@@ -2,7 +2,7 @@
   "name": "webscript_dashboard",
   "version": "1.0.0",
   "description": "A Dashboard for developers.",
-  "main": "index.js",
+  "main": "dashboard/server.js",
   "scripts": {
     "start": "node dashboard/server",
     "nodemon": "node_modules/.bin/nodemon -i dashboard/webpages/ dashboard/server",
