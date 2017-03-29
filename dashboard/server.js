@@ -1,5 +1,5 @@
 /* jshint node: true */
-'use strict';
+'use static';
 
 var https   = require('https');
 var express = require('express');
@@ -504,8 +504,8 @@ function getAllNewsProviders(req, res) {
 function getNewsArticles(req, res) {
 
   sql.query(sql.format(
-    'SELECT userNews FROM dashboard WHERE id = ? AND gid = ?',
-    [req.params.id, req.params.gid]), function (err, data) {
+    'SELECT userNews FROM dashboard WHERE gid = ? AND id = ?',
+    [req.params.gid, req.params.id]), function (err, data) {
       if (err) { return error(res, 'user not found', err); }
       if(data.length > 0){
         var news = data[0].userNews.split(',');
