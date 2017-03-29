@@ -55,11 +55,11 @@ app.use('/', express.static(webpages, { extensions: ['html'] }));
 app.use(function(req, res, next) {
     var err = new Error('Not Found');
     err.status = 404;
-    res.redirect('http://localhost:80/404');
+    res.redirect('http://localhost:8080/404');
     next(err);
 });
 // start the server
-app.listen(80);
+app.listen(8080);
 
 
 /* SERVER FUNCTIONS */
