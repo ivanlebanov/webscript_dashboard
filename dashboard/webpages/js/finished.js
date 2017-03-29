@@ -9,7 +9,10 @@ function init() {
   function storeConfig(json) {
     config = json;
   }
-
+  /*
+  * Insert the relevant link to the button in the UI
+  * and append the link in the paragraph.
+  */
   function getLink(){
     window.link.href = config.base + '/dashboard?secret=' + gid+
     '&id=' + dashboard;

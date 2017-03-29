@@ -41,11 +41,11 @@ app.delete('/api/dashboard/:gid/:id', deleteSingleDashboard);
 app.post('/api/dashboard/:gid', postUserDashboard);
 app.put('/api/dashboard/:gid/:id', updteUserDashboard);
 
-
 // News
 app.get('/api/news', getAllNewsProviders);
 app.get('/api/dashboard/:gid/:id/articles', getNewsArticles);
 app.post('/api/dashboard/:id/news', postUserNews);
+
 // Joke
 app.get('/api/joke', getRandomJoke);
 // static files
@@ -161,6 +161,29 @@ function getUser(req, res){
   });
 }
 
+/**
+ * @api {get} /api/dashboards/:gid Get User's Dashboards
+ * @apiName getUserDashboards
+ * @apiVersion 1.0.0
+ * @apiGroup Dashboard
+ *
+ * @apiParam {String} gid Users Google unique ID.
+ *
+ * @apiSuccessExample Success-Response:
+ *     HTTP/1.1 200 OK
+ *     [{
+ *       "id": "1",
+ *       "gid": "105498442129427323426",
+ *       "title": "Test",
+ *       "userNews": "nfl-news,techradar",
+ *       "showIssues": "0",
+ *       "showJoke": "1",
+ *       "showNews": "1",
+ *       "finishedSetup": "0"
+ *     }]
+ *
+ * @apiDescription Get all dashboards a user has created.
+*/
 function getUserDashboards(req, res) {
   sql.query(sql.format(
     'SELECT * FROM dashboard WHERE gid = ?',
@@ -174,6 +197,31 @@ function getUserDashboards(req, res) {
 
   });
 }
+
+/**
+ * @api {get} /api/dashboard/:gid/:id Get a Dashboard
+ * @apiName getSingleDashboard
+ * @apiVersion 1.0.0
+ * @apiGroup Dashboard
+ *
+ * @apiParam {String} gid Users Google unique ID.
+ *
+ * @apiSuccessExample Success-Response:
+ *     HTTP/1.1 200 OK
+ *     {
+ *       "id": "1",
+ *       "gid": "105498442129427323426",
+ *       "title": "Test",
+ *       "userNews": "nfl-news,techradar",
+ *       "showIssues": "0",
+ *       "showJoke": "1",
+ *       "showNews": "1",
+ *       "finishedSetup": "0"
+ *     }
+ *
+ * @apiDescription Get a single dashboard.
+ * a user has created.
+*/
 function getSingleDashboard(req, res) {
   sql.query(sql.format(
     'SELECT * FROM dashboard WHERE gid = ? AND id = ?',
@@ -188,6 +236,24 @@ function getSingleDashboard(req, res) {
   });
 }
 
+/**
+ * @api {delete} /api/dashboard/:gid/:id Delete
+ * @apiName deleteSingleDashboard
+ * @apiVersion 1.0.0
+ * @apiGroup Dashboard
+ *
+ * @apiParam {String} gid Users Google unique ID.
+ * @apiParam {String} id Dashboard's unique identifier.
+ *
+ * @apiSuccessExample Success-Response:
+ *     HTTP/1.1 200 OK
+ *      {
+ *         status: 'success',
+ *         message: 'Successfully deleted the dashboard.',
+ *      }
+ *
+ * @apiDescription Delete a single dashboard.
+*/
 function deleteSingleDashboard(req, res) {
   sql.query(sql.format(
     'DELETE FROM dashboard WHERE gid = ? AND id = ?',
@@ -202,6 +268,24 @@ function deleteSingleDashboard(req, res) {
   });
 }
 
+/**
+ * @api {post} /api/dashboard/:gid Create
+ * @apiName postUserDashboard
+ * @apiVersion 1.0.0
+ * @apiGroup Dashboard
+ *
+ * @apiParam {String} gid Users Google unique ID.
+ * @apiParam {String} title Dashboard's title.
+ *
+ * @apiSuccessExample Success-Response:
+ *     HTTP/1.1 200 OK
+ *      {
+ *         status: 'success',
+ *         message: 'Successfully created a dashboard.',
+ *      }
+ *
+ * @apiDescription Create a dashboard with default settings.
+*/
 function postUserDashboard(req,res) {
   var postParams = {
     title: req.body.title,
@@ -220,13 +304,35 @@ function postUserDashboard(req,res) {
     return res.json({
       status: 'success',
       message: 'Successfully created a dashboard.',
-      data: data
     });
 
 
   });
 }
 
+/**
+ * @api {put} /api/dashboard/:gid/:id Update
+ * @apiName updteUserDashboard
+ * @apiVersion 1.0.0
+ * @apiGroup Dashboard
+ *
+ * @apiParam {String} gid Users Google unique ID.
+ * @apiParam {String} id Dashboard's unique identifier.
+ * @apiParam {String} title Dashboard's title.
+ * @apiParam {String} showIssues setting either 0 or 1.
+ * @apiParam {String} showJoke setting either 0 or 1.
+ * @apiParam {String} showNews setting either 0 or 1.
+ *
+ * @apiSuccessExample Success-Response:
+ *     HTTP/1.1 200 OK
+ *      {
+ *         status: 'success',
+ *         message: 'Successfully updated a dashboard.',
+ *      }
+ *
+ * @apiDescription Update a dashboard with selected settings
+ * by the user.
+*/
 function updteUserDashboard(req, res) {
 
   sql.query(sql.format(

@@ -7,7 +7,12 @@ const gid = document.cookie.replace(
 function storeConfig(json) {
   config = json;
 }
-
+/*
+* Make and API call to get all user's
+* dashboards and call the function to
+* append them to the UI on
+* completion.
+*/
 function getUserDashboards(){
   fetch(config.base + '/api/dashboards/' + gid)
     .then( extract )
@@ -15,17 +20,25 @@ function getUserDashboards(){
       appendDashboards(response);
     } );
 }
+
+/*
+* Show a list of all user's dashboards with links
+* to edit, configure and delete, a title and
+* informational paragraph.
+*/
 function appendDashboards(dashboards) {
   clearHTML(window.dashboards);
 
   if(dashboards.length > 0){
     for (var i = 0; i < dashboards.length; i++) {
+      // create DOM elements
       let liElem = document.createElement('li');
       let headingElem = document.createElement('h2');
       let linkElem = document.createElement('a');
       let secondLinkElem = document.createElement('a');
       let lastLinkElem = document.createElement('a');
       let paraElem = document.createElement('p');
+      // add text contents, links and classes
       headingElem.textContent = dashboards[i].title;
       paraElem.textContent = 'Link to your dashboard: ' + config.base +
        '/dashboard?secret=' + gid + '&id=' + dashboards[i].id;
@@ -58,6 +71,7 @@ function appendDashboards(dashboards) {
 
       linkElem.classList.add('green-button');
       linkElem.classList.add('small-button');
+      // append the new html elements
       liElem.appendChild(headingElem);
       liElem.appendChild(paraElem);
       liElem.appendChild(linkElem);
@@ -85,13 +99,17 @@ function appendDashboards(dashboards) {
   }
 
 }
-
+/*
+* Get single dashboard information.
+*/
 function chooseSettings(id, title) {
   fetch(config.base + '/api/dashboard/' + gid + '/' + id)
   .then( extract )
   .then( r => showUpdatePopup(r) );
 }
-
+/*
+* Show update popup and fill the inputs.
+*/
 function showUpdatePopup(dashboard) {
   window.titleUpdate.value = dashboard.title;
   window.showIssues.checked = (dashboard.showIssues == 1) ? true : false;
@@ -101,7 +119,10 @@ function showUpdatePopup(dashboard) {
 
   window.popupEdit.classList.remove('hidden');
 }
-
+/*
+* Show a delete popup.
+* This part can and will be improved soon.
+*/
 function showDeletePopup(id, title) {
   if (confirm(`sure u want to delete ${title}`)) {
       fetch(config.base + '/api/dashboard/' + gid + '/' + id , {
@@ -113,13 +134,22 @@ function showDeletePopup(id, title) {
       .then(closeThePopup);
   }
 }
-
+/*
+* Close a popup to edit a dashboard.
+*/
 function closeThePopup(){
   window.popupAdd.classList.add('hidden');
 }
+/*
+* Close a popup to edit a dashboard.
+*/
 function closeThePopupEdit() {
   window.popupEdit.classList.add('hidden');
 }
+/*
+* Make an API call to add dashboard
+* created with default settings by the API.
+*/
 function addThedashboard() {
   fetch(config.base + '/api/dashboard/' + gid , {
     method: 'post',
@@ -136,6 +166,12 @@ function addThedashboard() {
   .then(getUserDashboards)
   .then(closeThePopup);
 }
+
+/*
+* Make an API call to update dashboard's
+* settings and title after which a message is
+* displayed as well as the popup closed.
+*/
 function updateTheDashboard() {
   let id = this.dataset.id;
   let params = {
@@ -157,16 +193,23 @@ function updateTheDashboard() {
   .then(getUserDashboards)
   .then(closeThePopupEdit);
 }
+
+/*
+* Open a popup to add a dashboard.
+*/
 function openPopup(e) {
   e.preventDefault();
   window.popupAdd.classList.remove('hidden');
 }
+
+fetch('js/config.json')
+  .then( extract )
+  .then( storeConfig )
+  .then( getUserDashboards );
+
+/// event listeners
 window.addDashboard.addEventListener('click', addThedashboard);
 window.createDashboard.addEventListener('click', openPopup);
 window.closePopup.addEventListener('click', closeThePopup);
 window.closePopupEdit.addEventListener('click', closeThePopupEdit);
 window.updateDashboard.addEventListener('click', updateTheDashboard);
-fetch('js/config.json')
-  .then( extract )
-  .then( storeConfig )
-  .then( getUserDashboards );

@@ -3,7 +3,11 @@ let config = {};
 function storeConfig(json) {
   config = json;
 }
-
+/*
+* Use the google client API to login a user
+* and save its credentials for later use via
+* the API.
+*/
 function onSignIn(googleUser) {
   const profile = googleUser.getBasicProfile();
   const authResponse = googleUser.getAuthResponse();

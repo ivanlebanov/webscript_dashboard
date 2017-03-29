@@ -8,7 +8,10 @@ function init(){
   function storeConfig(json) {
     config = json;
   }
-
+  /*
+  * A function to display a clock updated every
+  * 500 ms.
+  */
   function startTime() {
       let today = new Date();
       let h = today.getHours();
@@ -19,21 +22,30 @@ function init(){
       window.clock.textContent = h + ':' + m + ':' + s;
       setTimeout(startTime, 500);
   }
-  function storeDatabaseInfo(json) {
+  /*
+  * Save the retuned json to the dashboard variable.
+  */
+  function storeDashboardInfo(json) {
     dashboard = json;
-    console.log(dashboard);
   }
+  /*
+  * Append the User to the navigation
+  * bar of the dashboard.
+  */
   function appendUser(response){
     clearHTML(window.profileInfo);
     let element = document.createElement('img');
-    element.src = response.photo;
-    window.profileInfo.appendChild(element);
     let headingItem = document.createElement('h1');
     let fullName = response.firstname + ' ' + response.lastname;
+    element.src = response.photo;
+    window.profileInfo.appendChild(element);
     headingItem.textContent = greeting(fullName, new Date());
     window.profileInfo.appendChild(headingItem);
   }
-
+  /*
+  * Get the User  via the API and update the
+  * message every 10 minutes.
+  */
   function getUser() {
     fetch(config.base + '/api/user?gid=' + gid)
       .then( extract )
@@ -44,8 +56,11 @@ function init(){
         },60000 * 10);
       });
   }
-
-  function greeting(name, date, elem = false) {
+  /*
+  * Change the greeting message changing depending
+  * on the time.
+  */
+  function greeting(name, date) {
     let greeting = '';
     if(date.getHours() < 12){
       greeting = 'Good morning ' + name + '!';
@@ -58,7 +73,11 @@ function init(){
     return greeting;
 
   }
-
+  /*
+  * Get the Issues for a project if
+  * the user has chosen to show them
+  * otherwise hide the section.
+  */
   function getIssues() {
     if(dashboard.showIssues == 1){
       showElement(window.issues);
@@ -72,6 +91,11 @@ function init(){
       }
   }
 
+  /*
+  * Append issues to the UI if the
+  * API returns any otherwise
+  * show a message.
+  */
   function appendIssues(issues) {
     clearHTML(window.issueList);
     if(issues.length > 0){
@@ -80,7 +104,10 @@ function init(){
       noIssues();
     }
   }
-
+  /*
+  * Show a message in the UI
+  * for 'no issues'
+  */
   function noIssues() {
     // add paragraph
     let p = document.createElement('p');
@@ -88,6 +115,10 @@ function init(){
     window.issues.appendChild(p);
   }
 
+  /*
+  * Append all Github issues returned
+  * by the API as list items.
+  */
   function appendIssueList(issues){
 
     for (let i = 0; i < issues.length; i++) {
@@ -109,10 +140,12 @@ function init(){
 
   }
 
-
+  /*
+  * Get News articles or hide the
+  * section in the UI depending on user preferences.
+  */
   function getNewsArticles() {
     if(dashboard.showNews == 1){
-      // api/dashboard/:gid/:id/articles
       fetch(config.base + '/api/dashboard/' + gid + '/'+ id +'/articles')
         .then( extract )
         .then( r => appendArticle(r.articles));
@@ -122,6 +155,10 @@ function init(){
 
   }
 
+  /*
+  * Get random joke from the API or hide the
+  * section in the UI depending on user preferences.
+  */
   function getRandomJoke() {
     if(dashboard.showJoke == 1){
       showElement(window.chuckJoke);
@@ -134,6 +171,10 @@ function init(){
 
   }
 
+  /*
+  * Append a joke to the UI with the provided
+  * one by the API to the UI.
+  */
   function appendJoke(data) {
     clearHTML(window.chuckJoke);
     let paragraphItem = document.createElement('p');
@@ -141,7 +182,10 @@ function init(){
     window.chuckJoke.appendChild(paragraphItem);
   }
 
-
+  /*
+  * Append a random article from the returned
+  * by the API.
+  */
   function appendArticle(articles) {
     showElement(window.news);
     clearHTML(window.newsarcticle);
@@ -179,7 +223,10 @@ function init(){
     qrcode.clear();
     qrcode.makeCode(article.url);
   }
-
+  /*
+  * Show the message popup and hideElement
+  * it after a minute.
+  */
   function showMessage() {
     window.popup.classList.remove('hidden');
     setTimeout(
@@ -187,6 +234,10 @@ function init(){
         window.popup.classList.add('hidden');
       }, 60000);
   }
+  /*
+  * Initialize the dashboard calling
+  * all the needed functions.
+  */
   function initalizeDashboard() {
     getUser();
     startTime();
@@ -206,36 +257,50 @@ function init(){
       hideElement(window.chuckJoke);
     }
   }
-
-function hideElement(elem) {
-  elem.classList.add('hidden');
-}
-
-function showElement(elem) {
-  elem.classList.remove('hidden');
-}
-function getDashboardData() {
+  /*
+  * Hide an element
+  */
+  function hideElement(elem) {
+    elem.classList.add('hidden');
+  }
+  /*
+  * Show an element
+  */
+  function showElement(elem) {
+    elem.classList.remove('hidden');
+  }
+  /*
+  * Get dashboard data followed by
+  * initializing the dashboard.
+  */
+  function getDashboardData() {
+      fetch(config.base + '/api/dashboard/' + gid + '/' + id)
+        .then( extract )
+        .then( storeDashboardInfo )
+        .then( initalizeDashboard );
+  }
+  /*
+  * Get dashboard data to refresh
+  * the dashboard variable to
+  * show/hide sections without refresh.
+  */
+  function getDashboardDataOnly() {
     fetch(config.base + '/api/dashboard/' + gid + '/' + id)
       .then( extract )
-      .then( storeDatabaseInfo )
-      .then( initalizeDashboard );
-}
+      .then( storeDashboardInfo );
+  }
+
   fetch('js/config.json')
     .then( extract )
     .then( storeConfig )
     .then( getDashboardData );
 
-function getDashboardDataOnly() {
-  fetch(config.base + '/api/dashboard/' + gid + '/' + id)
-    .then( extract )
-    .then( storeDatabaseInfo );
-}
-  setInterval(getDashboardDataOnly, 10000);
-
+  // refreshing the dashboard in different intervals
+  setInterval(getDashboardDataOnly, 60000);
   setInterval(showMessage, 60000 * 30);
   setInterval(getRandomJoke, 60000 * 5);
   setInterval(getNewsArticles, 60000);
-  setInterval(getIssues, 15000);
+  setInterval(getIssues, 60000 * 5);
 
 }
 init();

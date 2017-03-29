@@ -9,7 +9,12 @@ function init(){
   function storeConfig(json) {
     config = json;
   }
-
+  /*
+  * Make an API call to the authorization
+  * endpoint and change the location
+  * to the next page of the
+  * configuration.
+  */
   function redirectToAuthorized() {
     const code = QueryString.code;
     fetch(config.base + '/api/authorize?gid=' + gid + '&code=' + code, {

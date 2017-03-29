@@ -1,20 +1,30 @@
-
 function clearHTML(elem) {
   while (elem.firstChild){
     elem.removeChild(elem.firstChild);
   }
 }
-
+/*
+* Extract json from a response.
+* Used for turning the response into json object
+*/
 function extract(response) {
   return response.json();
 }
 
+/*
+* Check time and prepend 0 if only
+* one digit is returned.
+*/
 function checkTime(i) {
     if (i < 10) {i = '0' + i;}
     return i;
 }
 
-function showMessage(status, message, reload = false){
+/*
+* Create UI element for a notification message
+* Remove it after 4 seconds.
+*/
+function showMessage(status, message){
   let divElem = document.createElement('div');
   let para = document.createElement('p');
   divElem.classList.add('message');
@@ -28,15 +38,11 @@ function showMessage(status, message, reload = false){
       document.body.removeChild(window.message);
 
     }, 4000);
-
-
 }
-function hideMessage(status, message){
 
-}
+// This function is anonymous, is executed immediately and
+// the return value is assigned to QueryString!
 var QueryString = function () {
-  // This function is anonymous, is executed immediately and
-  // the return value is assigned to QueryString!
   var querystring = {};
   var query = window.location.search.substring(1);
   var vars = query.split('&');
@@ -56,18 +62,3 @@ var QueryString = function () {
   }
   return querystring;
 }();
-
-// Pass the checkbox name to the function
-function getCheckedBoxes(chkboxName) {
-  var checkboxes = document.getElementsByName(chkboxName);
-  var checkboxesChecked = [];
-  // loop over them all
-  for (var i=0; i<checkboxes.length; i++) {
-     // And stick the checked ones onto an array...
-     if (checkboxes[i].checked) {
-        checkboxesChecked.push(checkboxes[i]);
-     }
-  }
-  // Return the array if it is non-empty, or null
-  return checkboxesChecked.length > 0 ? checkboxesChecked : null;
-}
