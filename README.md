@@ -22,10 +22,12 @@ The API documentation can be accessed on /doc.
 + running tests on UI and server
 
 ## Setup
-The setup assumes that you have mysql as well as git installed. If you want to install the software follow those steps:
+The setup assumes that you have mysql as well as git and npm installed. If you want to install the software follow those steps:
 
 + git clone https://github.com/ivanlebanov/webscript_dashboard.git
 + npm install
-+ create your own github app and change the oauthClientId and clientSecret
++ create your own github app and change the oauthClientId and clientSecret in dashboard/sql_init.sql
 + change mysql setting according to your personal
++ change base in dashboard/webpages/js/config.json
++ run "npm run initsql"
 + run "npm run dashboard"
