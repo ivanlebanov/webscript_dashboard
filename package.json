@@ -5,8 +5,10 @@
   "main": "dashboard/server.js",
   "scripts": {
     "start": "node dashboard/server",
+    "test": "mocha -R spec test.js",
     "nodemon": "node_modules/.bin/nodemon -i dashboard/webpages/ dashboard/server",
     "dashboard": "node_modules/.bin/forever start ./dashboard/server.js",
+    "stop": "node_modules/.bin/forever stop ./dashboard/server.js",
     "initsql": "mysql -u root -p < dashboard/sql_init.sql"
   },
   "keywords": [
@@ -22,10 +24,14 @@
   },
   "repository": "https://github.com/ivanlebanov/webscript_dashboard.git",
   "dependencies": {
+    "assert": "^1.4.1",
     "body-parser": "^1.17.1",
     "express": "^4.14.0",
     "forever": "^0.15.3",
+    "mocha": "^3.2.0",
     "mysql": "^2.12.0",
-    "querystring": "^0.2.0"
+    "querystring": "^0.2.0",
+    "qunit": "^1.0.0",
+    "supertest": "^3.0.0"
   }
 }

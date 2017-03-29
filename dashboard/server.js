@@ -53,13 +53,14 @@ app.use('/', express.static(webpages, { extensions: ['html'] }));
 
 // 404 not found page
 app.use(function(req, res, next) {
-    var err = new Error('Not Found');
-    err.status = 404;
+    //var err = new Error('Not Found');
+    //err.status = 404;
     res.redirect('http://localhost:8080/404');
-    next(err);
+    //next(err);
 });
 // start the server
 app.listen(8080);
+module.exports = app;
 
 
 /* SERVER FUNCTIONS */
