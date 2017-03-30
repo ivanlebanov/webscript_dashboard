@@ -438,6 +438,7 @@ function getIssues(req, res) {
     'SELECT gittoken FROM user WHERE gid = ?',
     [req.params.id]), function (err, data) {
       if (err){ return error(res, 'user not found', err); }
+
       if(data.length > 0){
 
         var reqOptions = {
@@ -457,6 +458,11 @@ function getIssues(req, res) {
 
         https.request(reqOptions, callback).end();
 
+      }else{
+        return res.json({
+           status  : 'error',
+           message : 'The user is not found'
+         });
       }
   });
 }

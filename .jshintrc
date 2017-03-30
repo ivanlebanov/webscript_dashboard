@@ -10,7 +10,8 @@
     "showMessage": true,
     "confirm": true,
     "test": true,
-    "it": true
+    "it": true,
+    "describe" : true
 
   },
 	"camelcase" : true,
