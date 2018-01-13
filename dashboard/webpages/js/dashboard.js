@@ -59,6 +59,24 @@ function init(){
   }
 
   /*
+  * Get the Issues for a project if
+  * the user has chosen to show them
+  * otherwise hide the section.
+  */
+  function getIssues() {
+    if(dashboard.showIssues == 1){
+      showElement(window.issues)
+      fetch(config.base + '/api/user/' + gid + '/issues')
+        .then( extract )
+        .then(function(response) {
+          appendIssues(response)
+        })
+      }else{
+        hideElement(window.issues)
+      }
+  }
+
+  /*
   * Change the greeting message changing depending
   * on the time.
   */
@@ -76,23 +94,7 @@ function init(){
     return greeting
 
   }
-  /*
-  * Get the Issues for a project if
-  * the user has chosen to show them
-  * otherwise hide the section.
-  */
-  function getIssues() {
-    if(dashboard.showIssues == 1){
-      showElement(window.issues)
-      fetch(config.base + '/api/user/' + gid + '/issues')
-        .then( extract )
-        .then(function(response) {
-          appendIssues(response)
-        })
-      }else{
-        hideElement(window.issues)
-      }
-  }
+
 
   /*
   * Append issues to the UI if the
